@@ -41,6 +41,26 @@ fun LoginScreen(
     val FoodlyPink = Color(0xFFE91E63)
 
     var passwordVisible by remember { mutableStateOf(false) }
+    var emailTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+    var attemptedSubmit by remember { mutableStateOf(false) }
+
+    val emailValue = state.email.trim()
+    val passwordValue = state.password
+    val emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$".toRegex()
+    val emailError = when {
+        emailValue.isEmpty() -> "El correo es obligatorio"
+        !emailRegex.matches(emailValue) -> "El correo no es valido"
+        else -> null
+    }
+    val passwordError = when {
+        passwordValue.isEmpty() -> "La contrasena es obligatoria"
+        passwordValue.length < 6 -> "La contrasena debe tener al menos 6 caracteres"
+        else -> null
+    }
+    val shouldShowEmailError = (emailTouched || attemptedSubmit) && emailError != null
+    val shouldShowPasswordError = (passwordTouched || attemptedSubmit) && passwordError != null
+    val isFormValid = emailError == null && passwordError == null
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -88,7 +108,10 @@ fun LoginScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.email,
-            onValueChange = { viewModel.state = state.copy(email = it) },
+            onValueChange = {
+                if (!emailTouched) emailTouched = true
+                viewModel.state = state.copy(email = it)
+            },
             label = { Text("Email Address") },
             placeholder = { Text("ejemplo@correo.com") },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FoodlyPink) },
@@ -101,7 +124,13 @@ fun LoginScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-            singleLine = true
+            singleLine = true,
+            isError = shouldShowEmailError,
+            supportingText = {
+                if (shouldShowEmailError) {
+                    Text(text = emailError ?: "", color = Color.Red)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -109,7 +138,10 @@ fun LoginScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.password,
-            onValueChange = { viewModel.state = state.copy(password = it) },
+            onValueChange = {
+                if (!passwordTouched) passwordTouched = true
+                viewModel.state = state.copy(password = it)
+            },
             label = { Text("Password") },
             placeholder = { Text("••••••") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FoodlyPink) },
@@ -136,7 +168,13 @@ fun LoginScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            singleLine = true
+            singleLine = true,
+            isError = shouldShowPasswordError,
+            supportingText = {
+                if (shouldShowPasswordError) {
+                    Text(text = passwordError ?: "", color = Color.Red)
+                }
+            }
         )
 
         if (state.error != null) {
@@ -153,7 +191,13 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                onClick = { viewModel.login(onLoginSuccess) },
+                onClick = {
+                    if (!isFormValid) {
+                        attemptedSubmit = true
+                        return@Button
+                    }
+                    viewModel.login(onLoginSuccess)
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = FoodlyPink,
                     contentColor = Color.White

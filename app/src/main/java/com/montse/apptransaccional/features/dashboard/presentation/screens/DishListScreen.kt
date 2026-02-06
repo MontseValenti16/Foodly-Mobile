@@ -38,7 +38,7 @@ fun DishListScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp, 40.dp ),
+            .padding(5.dp, 40.dp ),
         verticalArrangement = Arrangement.Top
     ) {
         DashboardHeader(onCreate = onCreate)

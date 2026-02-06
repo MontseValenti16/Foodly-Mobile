@@ -41,6 +41,34 @@ fun RegisterScreen(
 
     val FoodlyPink = Color(0xFFE91E63)
     var passwordVisible by remember { mutableStateOf(false) }
+    var nameTouched by remember { mutableStateOf(false) }
+    var emailTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+    var attemptedSubmit by remember { mutableStateOf(false) }
+
+    val nameValue = state.name.trim()
+    val emailValue = state.email.trim()
+    val passwordValue = state.password
+    val emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$".toRegex()
+    val nameError = when {
+        nameValue.isEmpty() -> "El nombre es obligatorio"
+        nameValue.length < 2 -> "El nombre debe tener al menos 2 caracteres"
+        else -> null
+    }
+    val emailError = when {
+        emailValue.isEmpty() -> "El correo es obligatorio"
+        !emailRegex.matches(emailValue) -> "El correo no es valido"
+        else -> null
+    }
+    val passwordError = when {
+        passwordValue.isEmpty() -> "La contrasena es obligatoria"
+        passwordValue.length < 6 -> "La contrasena debe tener al menos 6 caracteres"
+        else -> null
+    }
+    val shouldShowNameError = (nameTouched || attemptedSubmit) && nameError != null
+    val shouldShowEmailError = (emailTouched || attemptedSubmit) && emailError != null
+    val shouldShowPasswordError = (passwordTouched || attemptedSubmit) && passwordError != null
+    val isFormValid = nameError == null && emailError == null && passwordError == null
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -76,7 +104,10 @@ fun RegisterScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.name,
-            onValueChange = { viewModel.state = state.copy(name = it) },
+            onValueChange = {
+                if (!nameTouched) nameTouched = true
+                viewModel.state = state.copy(name = it)
+            },
             label = { Text("Username") },
             placeholder = { Text("Tu Nombre") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FoodlyPink) },
@@ -89,7 +120,13 @@ fun RegisterScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
-            singleLine = true
+            singleLine = true,
+            isError = shouldShowNameError,
+            supportingText = {
+                if (shouldShowNameError) {
+                    Text(text = nameError ?: "", color = Color.Red)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -97,7 +134,10 @@ fun RegisterScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.email,
-            onValueChange = { viewModel.state = state.copy(email = it) },
+            onValueChange = {
+                if (!emailTouched) emailTouched = true
+                viewModel.state = state.copy(email = it)
+            },
             label = { Text("Email Address") },
             placeholder = { Text("ejemplo@correo.com") },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FoodlyPink) },
@@ -110,7 +150,13 @@ fun RegisterScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-            singleLine = true
+            singleLine = true,
+            isError = shouldShowEmailError,
+            supportingText = {
+                if (shouldShowEmailError) {
+                    Text(text = emailError ?: "", color = Color.Red)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -118,7 +164,10 @@ fun RegisterScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.password,
-            onValueChange = { viewModel.state = state.copy(password = it) },
+            onValueChange = {
+                if (!passwordTouched) passwordTouched = true
+                viewModel.state = state.copy(password = it)
+            },
             label = { Text("Password") },
             placeholder = { Text("••••••") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FoodlyPink) },
@@ -139,7 +188,13 @@ fun RegisterScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            singleLine = true
+            singleLine = true,
+            isError = shouldShowPasswordError,
+            supportingText = {
+                if (shouldShowPasswordError) {
+                    Text(text = passwordError ?: "", color = Color.Red)
+                }
+            }
         )
 
         if (state.error != null) {
@@ -154,7 +209,13 @@ fun RegisterScreen(
         } else {
             Button(
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                onClick = { viewModel.register(onSuccess = onRegisterSuccess) },
+                onClick = {
+                    if (!isFormValid) {
+                        attemptedSubmit = true
+                        return@Button
+                    }
+                    viewModel.register(onSuccess = onRegisterSuccess)
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = FoodlyPink, contentColor = Color.White),
                 shape = RoundedCornerShape(15.dp)
             ) {
