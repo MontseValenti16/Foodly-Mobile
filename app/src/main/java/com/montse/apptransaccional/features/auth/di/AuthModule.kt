@@ -7,7 +7,10 @@ import com.montse.apptransaccional.features.auth.domain.usecases.RegisterUseCase
 import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModelFactory
 
 class AuthModule(appContainer: AppContainer) {
-    private val repository = AuthRepositoryImpl(appContainer.restaurantApi)
+    private val repository = AuthRepositoryImpl(
+        appContainer.restaurantApi,
+        appContainer.sessionManager
+    )
     private val loginUseCase = LoginUseCase(repository)
     private val registerUseCase = RegisterUseCase(repository)
 

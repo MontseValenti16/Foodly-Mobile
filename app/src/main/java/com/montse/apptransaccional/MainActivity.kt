@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import com.montse.apptransaccional.core.di.AppContainer
 import com.montse.apptransaccional.core.navigation.NavigationWrapper
 import com.montse.apptransaccional.features.auth.di.AuthModule
-import com.montse.apptransaccional.features.menu.di.MenuModule
+import com.montse.apptransaccional.features.dashboard.di.DashboardModule
 import com.montse.apptransaccional.ui.theme.AppTransaccionalTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,11 +15,11 @@ class MainActivity : ComponentActivity() {
 
         val appContainer = AppContainer(this)
         val authModule = AuthModule(appContainer)
-        val menuModule = MenuModule(appContainer)
+        val dashboardModule = DashboardModule(appContainer)
 
         setContent {
             AppTransaccionalTheme {
-                NavigationWrapper(authModule, menuModule)
+                NavigationWrapper(authModule, dashboardModule)
             }
         }
     }
