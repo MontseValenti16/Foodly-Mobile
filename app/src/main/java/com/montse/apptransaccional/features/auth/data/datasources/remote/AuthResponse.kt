@@ -1,3 +1,10 @@
 package com.montse.apptransaccional.features.auth.data.datasources.remote
 
-data class AuthResponse(val token: String, val userId: Int)
+import com.google.gson.annotations.SerializedName
+
+data class AuthResponse(
+	val token: String,
+	@SerializedName("userID") val userId: Int,
+	val message: String? = null,
+	val userRol: String? = null
+)

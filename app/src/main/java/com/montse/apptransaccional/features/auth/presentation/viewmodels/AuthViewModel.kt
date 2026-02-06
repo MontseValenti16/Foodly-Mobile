@@ -14,19 +14,16 @@ class AuthViewModel(
     private val registerUseCase: RegisterUseCase
 ) : ViewModel() {
 
-    // Estado único que maneja los datos de la pantalla
     var state by mutableStateOf(AuthState())
 
-    // --- FUNCIÓN LOGIN ---
     fun login(onSuccess: () -> Unit) {
         viewModelScope.launch {
             state = state.copy(isLoading = true, error = null)
             try {
-                // Llamada al caso de uso (API)
                 loginUseCase(state.email, state.password)
 
                 state = state.copy(isLoading = false)
-                onSuccess() // Navegar si todo sale bien
+                onSuccess()
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
@@ -36,16 +33,14 @@ class AuthViewModel(
         }
     }
 
-    // --- FUNCIÓN REGISTRO (LA QUE FALTABA) ---
     fun register(onSuccess: () -> Unit) {
         viewModelScope.launch {
             state = state.copy(isLoading = true, error = null)
             try {
-                // Llamada al caso de uso (API) enviando nombre, email y pass
                 registerUseCase(state.name, state.email, state.password)
 
                 state = state.copy(isLoading = false)
-                onSuccess() // Navegar si todo sale bien
+                onSuccess()
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
@@ -56,11 +51,10 @@ class AuthViewModel(
     }
 }
 
-// Modelo del estado de la UI
 data class AuthState(
     var email: String = "",
     var password: String = "",
-    var name: String = "", // Campo necesario para registro
+    var name: String = "",
     var isLoading: Boolean = false,
     var error: String? = null
 )
