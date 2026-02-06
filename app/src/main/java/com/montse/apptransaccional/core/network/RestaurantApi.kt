@@ -3,8 +3,16 @@ package com.montse.apptransaccional.core.network
 import com.montse.apptransaccional.features.auth.data.datasources.remote.AuthResponse
 import com.montse.apptransaccional.features.auth.data.datasources.remote.LoginRequest
 import com.montse.apptransaccional.features.auth.data.datasources.remote.RegisterRequest
+import com.montse.apptransaccional.features.dashboard.data.datasources.remote.CreateDishRequest
+import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishDto
+import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishResponse
+import com.montse.apptransaccional.features.dashboard.data.datasources.remote.UpdateDishRequest
 import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 interface RestaurantApi {
     @POST("users/auth/login")
@@ -12,5 +20,23 @@ interface RestaurantApi {
 
     @POST("users/auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
+
+    @GET("dishes")
+    suspend fun getDishes(): List<DishDto>
+
+    @GET("dishes/{id}")
+    suspend fun getDishById(@Path("id") id: Int): DishResponse
+
+    @POST("dishes")
+    suspend fun createDish(@Body request: CreateDishRequest): DishDto
+
+    @PUT("dishes/{id}")
+    suspend fun updateDish(
+        @Path("id") id: Int,
+        @Body request: UpdateDishRequest
+    ): Map<String, Any>
+
+    @DELETE("dishes/{id}")
+    suspend fun deleteDish(@Path("id") id: Int): Map<String, Any>
 }
 

@@ -50,7 +50,6 @@ fun RegisterScreen(
             .padding(24.dp)
     ) {
 
-        // 1. LOGO
         Surface(
             modifier = Modifier.size(180.dp),
             shape = CircleShape,
@@ -69,13 +68,11 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 2. TEXTOS
         Text("Create Account", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Text("Sign up to get started", color = Color.Gray, fontSize = 16.sp)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 3. CAMPO NOMBRE (Full Name)
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.name,
@@ -97,7 +94,6 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // 4. CAMPO EMAIL
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.email,
@@ -119,7 +115,6 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // 5. CAMPO PASSWORD (Con Ojito)
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.password,
@@ -147,7 +142,6 @@ fun RegisterScreen(
             singleLine = true
         )
 
-        // Error Message
         if (state.error != null) {
             Spacer(modifier = Modifier.height(10.dp))
             Text(state.error!!, color = Color.Red, fontSize = 14.sp)
@@ -155,16 +149,12 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 6. BOTÓN SIGN UP
         if (state.isLoading) {
             CircularProgressIndicator(color = FoodlyPink)
         } else {
             Button(
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                onClick = {
-                    // Llamada correcta a la función register del ViewModel
-                    viewModel.register(onSuccess = onRegisterSuccess)
-                },
+                onClick = { viewModel.register(onSuccess = onRegisterSuccess) },
                 colors = ButtonDefaults.buttonColors(containerColor = FoodlyPink, contentColor = Color.White),
                 shape = RoundedCornerShape(15.dp)
             ) {
@@ -174,7 +164,6 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 7. VOLVER AL LOGIN
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = "Already have an account? ", color = Color.Gray)
             Text(
