@@ -11,7 +11,9 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.montse.apptransaccional.R
 import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModel
@@ -36,31 +39,9 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit
 ) {
     val viewModel: AuthViewModel = viewModel(factory = factory)
-    val state = viewModel.state
+    val state by viewModel.authState.collectAsStateWithLifecycle()
 
     val FoodlyPink = Color(0xFFE91E63)
-
-    var passwordVisible by remember { mutableStateOf(false) }
-    var emailTouched by remember { mutableStateOf(false) }
-    var passwordTouched by remember { mutableStateOf(false) }
-    var attemptedSubmit by remember { mutableStateOf(false) }
-
-    val emailValue = state.email.trim()
-    val passwordValue = state.password
-    val emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$".toRegex()
-    val emailError = when {
-        emailValue.isEmpty() -> "El correo es obligatorio"
-        !emailRegex.matches(emailValue) -> "El correo no es valido"
-        else -> null
-    }
-    val passwordError = when {
-        passwordValue.isEmpty() -> "La contrasena es obligatoria"
-        passwordValue.length < 6 -> "La contrasena debe tener al menos 6 caracteres"
-        else -> null
-    }
-    val shouldShowEmailError = (emailTouched || attemptedSubmit) && emailError != null
-    val shouldShowPasswordError = (passwordTouched || attemptedSubmit) && passwordError != null
-    val isFormValid = emailError == null && passwordError == null
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -109,8 +90,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             value = state.email,
             onValueChange = {
-                if (!emailTouched) emailTouched = true
-                viewModel.state = state.copy(email = it)
+                viewModel.onEmailChange(it)
             },
             label = { Text("Email Address") },
             placeholder = { Text("ejemplo@correo.com") },
@@ -125,10 +105,10 @@ fun LoginScreen(
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             singleLine = true,
-            isError = shouldShowEmailError,
+            isError = state.shouldShowEmailError,
             supportingText = {
-                if (shouldShowEmailError) {
-                    Text(text = emailError ?: "", color = Color.Red)
+                if (state.shouldShowEmailError) {
+                    Text(text = state.emailError ?: "", color = Color.Red)
                 }
             }
         )
@@ -139,8 +119,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             value = state.password,
             onValueChange = {
-                if (!passwordTouched) passwordTouched = true
-                viewModel.state = state.copy(password = it)
+                viewModel.onPasswordChange(it)
             },
             label = { Text("Password") },
             placeholder = { Text("••••••") },
@@ -149,15 +128,19 @@ fun LoginScreen(
             trailingIcon = {
                 val image = Icons.Default.Visibility
 
-                val tint = if (passwordVisible) FoodlyPink else Color.Gray
-                val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                val tint = if (state.isPasswordVisible) FoodlyPink else Color.Gray
+                val description = if (state.isPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
 
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
                     Icon(imageVector = image, contentDescription = description, tint = tint)
                 }
             },
 
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (state.isPasswordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
 
             shape = RoundedCornerShape(15.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -169,10 +152,10 @@ fun LoginScreen(
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             singleLine = true,
-            isError = shouldShowPasswordError,
+            isError = state.shouldShowPasswordError,
             supportingText = {
-                if (shouldShowPasswordError) {
-                    Text(text = passwordError ?: "", color = Color.Red)
+                if (state.shouldShowPasswordError) {
+                    Text(text = state.passwordError ?: "", color = Color.Red)
                 }
             }
         )
@@ -191,13 +174,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                onClick = {
-                    if (!isFormValid) {
-                        attemptedSubmit = true
-                        return@Button
-                    }
-                    viewModel.login(onLoginSuccess)
-                },
+                onClick = { viewModel.login(onLoginSuccess) },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = FoodlyPink,
                     contentColor = Color.White
