@@ -40,13 +40,14 @@ fun NavigationWrapper(
             RegisterScreen(
                 factory = authModule.provideAuthViewModelFactory(),
                 onRegisterSuccess = {
-                    // Al registrarse, entra directo al menú
-                    navController.navigate("menu") {
-                        popUpTo("login") { inclusive = true }
+                    // CAMBIO: Al registrarse, ahora te manda al LOGIN para que entres
+                    navController.navigate("login") {
+                        // Borramos el registro de la pila para que "atrás" no vuelva al registro
+                        popUpTo("register") { inclusive = true }
                     }
                 },
                 onBack = {
-                    navController.popBackStack() // Vuelve atrás (al Login)
+                    navController.popBackStack()
                 }
             )
         }
