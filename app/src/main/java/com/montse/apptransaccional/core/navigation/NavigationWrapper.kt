@@ -49,7 +49,7 @@ fun NavigationWrapper(
                     }
                 },
                 onBack = {
-                    navController.popBackStack() // Vuelve atrás (al Login)
+                    navController.popBackStack()
                 }
             )
         }
