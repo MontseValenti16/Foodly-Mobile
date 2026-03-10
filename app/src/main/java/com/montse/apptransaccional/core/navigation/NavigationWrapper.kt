@@ -1,51 +1,40 @@
-    package com.montse.apptransaccional.core.navigation
+package com.montse.apptransaccional.core.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.montse.apptransaccional.features.auth.di.AuthModule
+import androidx.navigation.toRoute
 import com.montse.apptransaccional.features.auth.presentation.screens.LoginScreen
 import com.montse.apptransaccional.features.auth.presentation.screens.RegisterScreen
-import com.montse.apptransaccional.features.dashboard.di.DashboardModule
 import com.montse.apptransaccional.features.dashboard.presentation.screens.CreateDishScreen
 import com.montse.apptransaccional.features.dashboard.presentation.screens.DishListScreen
 import com.montse.apptransaccional.features.dashboard.presentation.screens.EditDishScreen
-import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.DashboardViewModel
-
 
 @Composable
-fun NavigationWrapper(
-    authModule: AuthModule,
-    dashboardModule: DashboardModule
-) {
+fun NavigationWrapper() {
     val navController = rememberNavController()
-    val dashboardViewModel: DashboardViewModel = viewModel(
-        factory = dashboardModule.provideDashboardViewModelFactory()
-    )
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = Screen.Login) {
 
-        composable("login") {
+        composable<Screen.Login> {
             LoginScreen(
-                factory = authModule.provideAuthViewModelFactory(),
                 onLoginSuccess = {
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(Screen.Dashboard) {
+                        popUpTo(Screen.Login) { inclusive = true }
                     }
                 },
                 onNavigateToRegister = {
-                    navController.navigate("register")
+                    navController.navigate(Screen.Register)
                 }
             )
         }
-        composable("register") {
+
+        composable<Screen.Register> {
             RegisterScreen(
-                factory = authModule.provideAuthViewModelFactory(),
                 onRegisterSuccess = {
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate(Screen.Dashboard) {
+                        popUpTo(Screen.Login) { inclusive = true }
                     }
                 },
                 onBack = {
@@ -54,31 +43,26 @@ fun NavigationWrapper(
             )
         }
 
-        composable("dashboard") {
+        composable<Screen.Dashboard> {
             DishListScreen(
-                viewModel = dashboardViewModel,
-                onCreate = { navController.navigate("dashboard/create") },
-                onEdit = { id -> navController.navigate("dashboard/edit/$id") },
-                onDelete = dashboardViewModel::deleteDish
+                onCreate = { navController.navigate(Screen.CreateDish) },
+                onEdit = { id -> navController.navigate(Screen.EditDish(id)) },
+                onDelete = { /* El ViewModel dentro de DishListScreen ya gestiona esto */ }
             )
         }
 
-        composable("dashboard/create") {
+        composable<Screen.CreateDish> {
             CreateDishScreen(
-                viewModel = dashboardViewModel,
                 onBack = { navController.popBackStack() }
             )
         }
 
-        composable("dashboard/edit/{id}") { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
-                ?: return@composable
+        composable<Screen.EditDish> { backStackEntry ->
+            val editDish: Screen.EditDish = backStackEntry.toRoute()
             EditDishScreen(
-                viewModel = dashboardViewModel,
-                dishId = id,
+                dishId = editDish.id,
                 onBack = { navController.popBackStack() }
             )
         }
-
     }
 }

@@ -9,13 +9,15 @@ import com.montse.apptransaccional.features.dashboard.domain.usecases.GetDishByI
 import com.montse.apptransaccional.features.dashboard.domain.usecases.GetDishesUseCase
 import com.montse.apptransaccional.features.dashboard.domain.usecases.UpdateDishUseCase
 import com.montse.apptransaccional.features.dashboard.presentation.state.DashboardState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class DashboardViewModel(
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
 	private val getDishesUseCase: GetDishesUseCase,
 	private val getDishByIdUseCase: GetDishByIdUseCase,
 	private val createDishUseCase: CreateDishUseCase,
@@ -199,4 +201,3 @@ class DashboardViewModel(
 		attemptedSubmit = false
 	}
 }
-

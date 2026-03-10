@@ -1,9 +1,7 @@
 package com.montse.apptransaccional.features.auth.presentation.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,19 +24,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.montse.apptransaccional.R
 import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModel
-import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModelFactory
 
 @Composable
 fun LoginScreen(
-    factory: AuthViewModelFactory,
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val viewModel: AuthViewModel = viewModel(factory = factory)
     val state by viewModel.authState.collectAsStateWithLifecycle()
 
     val FoodlyPink = Color(0xFFE91E63)
@@ -185,6 +181,5 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-
     }
 }

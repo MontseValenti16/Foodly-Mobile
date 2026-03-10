@@ -2,7 +2,8 @@ package com.montse.apptransaccional.features.dashboard.domain.usecases
 
 import com.montse.apptransaccional.features.dashboard.domain.models.Dish
 import com.montse.apptransaccional.features.dashboard.domain.repositories.DishRepository
+import javax.inject.Inject
 
-class UpdateDishUseCase(private val repository: DishRepository) {
+class UpdateDishUseCase @Inject constructor(private val repository: DishRepository) {
     suspend operator fun invoke(dish: Dish) = repository.updateDish(dish)
 }

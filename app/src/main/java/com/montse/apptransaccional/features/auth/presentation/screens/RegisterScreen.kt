@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,19 +26,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.montse.apptransaccional.R
 import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModel
-import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModelFactory
 
 @Composable
 fun RegisterScreen(
-    factory: AuthViewModelFactory,
     onRegisterSuccess: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val viewModel: AuthViewModel = viewModel(factory = factory)
     val state by viewModel.authState.collectAsStateWithLifecycle()
 
     val FoodlyPink = Color(0xFFE91E63)
@@ -80,7 +77,7 @@ fun RegisterScreen(
             onValueChange = {
                 viewModel.onNameChange(it)
             },
-            label = { Text("Username") },
+            label = { Text("Full Name") },
             placeholder = { Text("Tu Nombre") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FoodlyPink) },
             shape = RoundedCornerShape(15.dp),
@@ -97,6 +94,35 @@ fun RegisterScreen(
             supportingText = {
                 if (state.shouldShowNameError) {
                     Text(text = state.nameError ?: "", color = Color.Red)
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = state.username,
+            onValueChange = {
+                viewModel.onUsernameChange(it)
+            },
+            label = { Text("Username") },
+            placeholder = { Text("MikiMono") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FoodlyPink) },
+            shape = RoundedCornerShape(15.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = FoodlyPink,
+                focusedLabelColor = FoodlyPink,
+                cursorColor = FoodlyPink,
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+            singleLine = true,
+            isError = state.shouldShowUsernameError,
+            supportingText = {
+                if (state.shouldShowUsernameError) {
+                    Text(text = state.usernameError ?: "", color = Color.Red)
                 }
             }
         )
