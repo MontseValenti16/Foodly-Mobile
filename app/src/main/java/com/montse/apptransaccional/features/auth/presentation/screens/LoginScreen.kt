@@ -164,7 +164,6 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(10.dp))
             Text(state.error!!, color = Color.Red, fontSize = 14.sp)
         }
-
         Spacer(modifier = Modifier.height(30.dp))
 
         if (state.isLoading) {
