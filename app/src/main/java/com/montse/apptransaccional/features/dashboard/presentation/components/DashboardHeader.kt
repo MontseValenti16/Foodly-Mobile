@@ -28,7 +28,6 @@ import com.montse.apptransaccional.R
 @Composable
 fun DashboardHeader(onCreate: () -> Unit) {
     val foodlyPink = Color(0xFFE91E63)
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
