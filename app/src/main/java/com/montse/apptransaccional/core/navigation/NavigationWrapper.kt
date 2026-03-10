@@ -30,24 +30,12 @@ fun NavigationWrapper() {
             )
         }
 
-        composable<Screen.Register> {
-            RegisterScreen(
-                onRegisterSuccess = {
-                    navController.navigate(Screen.Dashboard) {
-                        popUpTo(Screen.Login) { inclusive = true }
-                    }
-                },
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
 
         composable<Screen.Dashboard> {
             DishListScreen(
                 onCreate = { navController.navigate(Screen.CreateDish) },
                 onEdit = { id -> navController.navigate(Screen.EditDish(id)) },
-                onDelete = { /* El ViewModel dentro de DishListScreen ya gestiona esto */ }
+                onDelete = {}
             )
         }
 
