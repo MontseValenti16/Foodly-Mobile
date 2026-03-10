@@ -12,7 +12,9 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +27,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.montse.apptransaccional.R
 import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModel
@@ -37,11 +40,9 @@ fun RegisterScreen(
     onBack: () -> Unit
 ) {
     val viewModel: AuthViewModel = viewModel(factory = factory)
-    val state = viewModel.state
+    val state by viewModel.authState.collectAsStateWithLifecycle()
 
     val FoodlyPink = Color(0xFFE91E63)
-    var passwordVisible by remember { mutableStateOf(false) }
-
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,7 +77,9 @@ fun RegisterScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.name,
-            onValueChange = { viewModel.state = state.copy(name = it) },
+            onValueChange = {
+                viewModel.onNameChange(it)
+            },
             label = { Text("Username") },
             placeholder = { Text("Tu Nombre") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FoodlyPink) },
@@ -89,7 +92,13 @@ fun RegisterScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
-            singleLine = true
+            singleLine = true,
+            isError = state.shouldShowNameError,
+            supportingText = {
+                if (state.shouldShowNameError) {
+                    Text(text = state.nameError ?: "", color = Color.Red)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -97,7 +106,9 @@ fun RegisterScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.email,
-            onValueChange = { viewModel.state = state.copy(email = it) },
+            onValueChange = {
+                viewModel.onEmailChange(it)
+            },
             label = { Text("Email Address") },
             placeholder = { Text("ejemplo@correo.com") },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FoodlyPink) },
@@ -110,7 +121,13 @@ fun RegisterScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-            singleLine = true
+            singleLine = true,
+            isError = state.shouldShowEmailError,
+            supportingText = {
+                if (state.shouldShowEmailError) {
+                    Text(text = state.emailError ?: "", color = Color.Red)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -118,18 +135,24 @@ fun RegisterScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.password,
-            onValueChange = { viewModel.state = state.copy(password = it) },
+            onValueChange = {
+                viewModel.onPasswordChange(it)
+            },
             label = { Text("Password") },
             placeholder = { Text("••••••") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FoodlyPink) },
             trailingIcon = {
                 val image = Icons.Default.Visibility
-                val tint = if (passwordVisible) FoodlyPink else Color.Gray
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                val tint = if (state.isPasswordVisible) FoodlyPink else Color.Gray
+                IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
                     Icon(imageVector = image, contentDescription = "Toggle Pass", tint = tint)
                 }
             },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (state.isPasswordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
             shape = RoundedCornerShape(15.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = FoodlyPink,
@@ -139,7 +162,13 @@ fun RegisterScreen(
                 unfocusedTextColor = Color.Black
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            singleLine = true
+            singleLine = true,
+            isError = state.shouldShowPasswordError,
+            supportingText = {
+                if (state.shouldShowPasswordError) {
+                    Text(text = state.passwordError ?: "", color = Color.Red)
+                }
+            }
         )
 
         if (state.error != null) {
@@ -154,7 +183,9 @@ fun RegisterScreen(
         } else {
             Button(
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                onClick = { viewModel.register(onSuccess = onRegisterSuccess) },
+                onClick = {
+                    viewModel.register(onSuccess = onRegisterSuccess)
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = FoodlyPink, contentColor = Color.White),
                 shape = RoundedCornerShape(15.dp)
             ) {

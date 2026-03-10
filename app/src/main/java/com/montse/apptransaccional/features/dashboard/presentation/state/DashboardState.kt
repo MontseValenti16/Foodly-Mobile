@@ -10,6 +10,11 @@ data class DashboardState(
     val precio: String = "",
     val categoria: String = "",
     val disponible: Boolean = true,
+    val nombreError: String? = null,
+    val precioError: String? = null,
+    val shouldShowNombreError: Boolean = false,
+    val shouldShowPrecioError: Boolean = false,
+    val isFormValid: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null
 )

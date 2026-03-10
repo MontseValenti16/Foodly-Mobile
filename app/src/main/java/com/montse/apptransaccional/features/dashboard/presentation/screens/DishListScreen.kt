@@ -14,9 +14,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.montse.apptransaccional.features.dashboard.presentation.components.DashboardHeader
 import com.montse.apptransaccional.features.dashboard.presentation.components.DishCard
 import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.DashboardViewModel
@@ -26,9 +29,9 @@ fun DishListScreen(
     viewModel: DashboardViewModel,
     onCreate: () -> Unit,
     onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
+    onDelete: (Int) -> Unit 
 ) {
-    val state = viewModel.state
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val foodlyPink = Color(0xFFE91E63)
 
     LaunchedEffect(Unit) {
@@ -38,15 +41,10 @@ fun DishListScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp, 40.dp ),
+            .padding(5.dp, 40.dp ),
         verticalArrangement = Arrangement.Top
     ) {
         DashboardHeader(onCreate = onCreate)
-
-        if (state.error != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = state.error, color = Color.Red)
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

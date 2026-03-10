@@ -1,6 +1,7 @@
-package com.montse.apptransaccional.features.dashboard.presentation.screens
+    package com.montse.apptransaccional.features.dashboard.presentation.screens
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.montse.apptransaccional.features.dashboard.presentation.components.DishForm
 import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.DashboardViewModel
 
@@ -12,7 +13,7 @@ fun CreateDishScreen(
     DishForm(
         title = "Crear platillo",
         viewModel = viewModel,
-        onLoad = viewModel::onCancelEdit,
+        onLoad = viewModel::initCreateForm,
         onSave = { viewModel.saveDish { onBack() } },
         onCancel = {
             viewModel.onCancelEdit()

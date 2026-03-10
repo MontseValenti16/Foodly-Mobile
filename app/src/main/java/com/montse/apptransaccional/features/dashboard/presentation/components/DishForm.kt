@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,12 +25,15 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.DashboardViewModel
 
 @Composable
@@ -38,7 +44,7 @@ fun DishForm(
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-    val state = viewModel.state
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val foodlyPink = Color(0xFFE91E63)
     val inputShape = RoundedCornerShape(15.dp)
 
@@ -49,6 +55,8 @@ fun DishForm(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Top
     ) {
@@ -63,8 +71,11 @@ fun DishForm(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.nombre,
-            onValueChange = viewModel::onNombreChange,
+            onValueChange = {
+                viewModel.onNombreChange(it)
+            },
             label = { Text("Nombre") },
+            isError = state.shouldShowNombreError,
             shape = inputShape,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = foodlyPink,
@@ -72,7 +83,12 @@ fun DishForm(
                 cursorColor = foodlyPink,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black
-            )
+            ),
+            supportingText = {
+                if (state.shouldShowNombreError) {
+                    Text(text = state.nombreError ?: "", color = Color.Red)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -97,9 +113,12 @@ fun DishForm(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.precio,
-            onValueChange = viewModel::onPrecioChange,
+            onValueChange = {
+                viewModel.onPrecioChange(it)
+            },
             label = { Text("Precio") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = state.shouldShowPrecioError,
             shape = inputShape,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = foodlyPink,
@@ -107,7 +126,12 @@ fun DishForm(
                 cursorColor = foodlyPink,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black
-            )
+            ),
+            supportingText = {
+                if (state.shouldShowPrecioError) {
+                    Text(text = state.precioError ?: "", color = Color.Red)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -137,17 +161,13 @@ fun DishForm(
                 onCheckedChange = viewModel::onDisponibleChange
             )
         }
-
-        if (state.error != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = state.error, color = Color.Red)
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Row {
             Button(
-                onClick = onSave,
+                onClick = {
+                    onSave()
+                },
                 enabled = !state.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = foodlyPink,

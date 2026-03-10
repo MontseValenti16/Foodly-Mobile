@@ -13,7 +13,7 @@ fun EditDishScreen(
     DishForm(
         title = "Editar platillo",
         viewModel = viewModel,
-        onLoad = { viewModel.onSelectDish(dishId) },
+        onLoad = { viewModel.initEditForm(dishId) },
         onSave = { viewModel.saveDish { onBack() } },
         onCancel = {
             viewModel.onCancelEdit()
