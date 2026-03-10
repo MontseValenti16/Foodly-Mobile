@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.montse.apptransaccional"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.montse.apptransaccional"
