@@ -17,6 +17,7 @@ class AuthViewModel(
     private val _authState = MutableStateFlow(AuthState())
     val authState : StateFlow<AuthState> = _authState.asStateFlow()
     private var nameTouched = false
+    private var usernameTouched = false
     private var emailTouched = false
     private var passwordTouched = false
     private var attemptedSubmit = false
@@ -32,6 +33,11 @@ class AuthViewModel(
         _authState.value = applyValidation(_authState.value.copy(name = value))
     }
 
+    fun onUsernameChange(value: String) {
+        if (!usernameTouched) usernameTouched = true
+        _authState.value = applyValidation(_authState.value.copy(username = value))
+    }
+
     fun onEmailChange(value: String) {
         if (!emailTouched) emailTouched = true
         _authState.value = applyValidation(_authState.value.copy(email = value))
@@ -44,6 +50,7 @@ class AuthViewModel(
 
     private fun applyValidation(baseState: AuthState): AuthState {
         val nameValue = baseState.name.trim()
+        val usernameValue = baseState.username.trim()
         val emailValue = baseState.email.trim()
         val passwordValue = baseState.password
         val emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$".toRegex()
@@ -51,6 +58,11 @@ class AuthViewModel(
         val nameError = when {
             nameValue.isEmpty() -> "El nombre es obligatorio"
             nameValue.length < 2 -> "El nombre debe tener al menos 2 caracteres"
+            else -> null
+        }
+        val usernameError = when {
+            usernameValue.isEmpty() -> "El usuario es obligatorio"
+            usernameValue.length < 3 -> "El usuario debe tener al menos 3 caracteres"
             else -> null
         }
         val emailError = when {
@@ -65,16 +77,20 @@ class AuthViewModel(
         }
 
         val shouldShowNameError = (nameTouched || attemptedSubmit) && nameError != null
+        val shouldShowUsernameError = (usernameTouched || attemptedSubmit) && usernameError != null
         val shouldShowEmailError = (emailTouched || attemptedSubmit) && emailError != null
         val shouldShowPasswordError = (passwordTouched || attemptedSubmit) && passwordError != null
-        val isLoginValid = emailError == null && passwordError == null
-        val isRegisterValid = nameError == null && emailError == null && passwordError == null
+        
+        val isLoginValid = usernameError == null && passwordError == null
+        val isRegisterValid = nameError == null && usernameError == null && emailError == null && passwordError == null
 
         return baseState.copy(
             nameError = nameError,
+            usernameError = usernameError,
             emailError = emailError,
             passwordError = passwordError,
             shouldShowNameError = shouldShowNameError,
+            shouldShowUsernameError = shouldShowUsernameError,
             shouldShowEmailError = shouldShowEmailError,
             shouldShowPasswordError = shouldShowPasswordError,
             isLoginValid = isLoginValid,
@@ -94,7 +110,7 @@ class AuthViewModel(
 
             _authState.value = _authState.value.copy(isLoading = true, error = null)
             try {
-                loginUseCase(_authState.value.email, _authState.value.password)
+                loginUseCase(_authState.value.username, _authState.value.password)
 
                 _authState.value = _authState.value.copy(isLoading = false)
                 onSuccess()
@@ -115,7 +131,7 @@ class AuthViewModel(
             _authState.value = _authState.value.copy(isLoading = true, error = null)
             try {
                 registerUseCase(
-                    _authState.value.name,
+                    _authState.value.username,
                     _authState.value.email,
                     _authState.value.password
                 )
@@ -131,4 +147,3 @@ class AuthViewModel(
         }
     }
 }
-

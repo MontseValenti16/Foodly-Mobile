@@ -3,16 +3,16 @@ package com.montse.apptransaccional.features.auth.presentation.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,10 +53,10 @@ fun LoginScreen(
 
         Surface(
             modifier = Modifier
-                .size(180.dp)
+                .size(150.dp)
                 .padding(4.dp),
             shape = CircleShape,
-            shadowElevation = 10.dp,
+            shadowElevation = 20.dp,
             color = Color.White
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -88,13 +88,13 @@ fun LoginScreen(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = state.email,
+            value = state.username,
             onValueChange = {
-                viewModel.onEmailChange(it)
+                viewModel.onUsernameChange(it)
             },
-            label = { Text("Email Address") },
-            placeholder = { Text("ejemplo@correo.com") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FoodlyPink) },
+            label = { Text("Username") },
+            placeholder = { Text("MikiMono") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FoodlyPink) },
             shape = RoundedCornerShape(15.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = FoodlyPink,
@@ -103,12 +103,12 @@ fun LoginScreen(
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black
             ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
             singleLine = true,
-            isError = state.shouldShowEmailError,
+            isError = state.shouldShowUsernameError,
             supportingText = {
-                if (state.shouldShowEmailError) {
-                    Text(text = state.emailError ?: "", color = Color.Red)
+                if (state.shouldShowUsernameError) {
+                    Text(text = state.usernameError ?: "", color = Color.Red)
                 }
             }
         )
@@ -187,14 +187,5 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "Don't have an account? ", color = Color.Gray)
-            Text(
-                text = "Sign up",
-                color = FoodlyPink,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onNavigateToRegister() }
-            )
-        }
     }
 }

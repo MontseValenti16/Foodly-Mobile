@@ -4,5 +4,5 @@ import com.montse.apptransaccional.features.auth.data.datasources.remote.AuthRes
 
 interface AuthRepository {
     suspend fun register(username: String, email: String, pass: String): AuthResponse
-    suspend fun login(email: String, pass: String): AuthResponse
+    suspend fun login(username: String, pass: String): AuthResponse
 }
