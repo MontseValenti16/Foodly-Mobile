@@ -1,14 +1,14 @@
 package com.montse.apptransaccional
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.fragment.app.FragmentActivity
 import com.montse.apptransaccional.core.navigation.NavigationWrapper
 import com.montse.apptransaccional.ui.theme.AppTransaccionalTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

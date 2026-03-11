@@ -2,8 +2,11 @@ package com.montse.apptransaccional.features.auth.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.montse.apptransaccional.features.auth.domain.usecases.GetBiometricCredentialsUseCase
+import com.montse.apptransaccional.features.auth.domain.usecases.IsBiometricLoginAvailableUseCase
 import com.montse.apptransaccional.features.auth.domain.usecases.LoginUseCase
 import com.montse.apptransaccional.features.auth.domain.usecases.RegisterUseCase
+import com.montse.apptransaccional.features.auth.domain.usecases.SaveBiometricCredentialsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +17,10 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
-    private val registerUseCase: RegisterUseCase
+    private val registerUseCase: RegisterUseCase,
+    private val isBiometricLoginAvailableUseCase: IsBiometricLoginAvailableUseCase,
+    private val getBiometricCredentialsUseCase: GetBiometricCredentialsUseCase,
+    private val saveBiometricCredentialsUseCase: SaveBiometricCredentialsUseCase
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
@@ -24,6 +30,16 @@ class AuthViewModel @Inject constructor(
     private var emailTouched = false
     private var passwordTouched = false
     private var attemptedSubmit = false
+
+    init {
+        refreshBiometricAvailability()
+    }
+
+    fun refreshBiometricAvailability() {
+        _authState.value = _authState.value.copy(
+            isBiometricLoginAvailable = isBiometricLoginAvailableUseCase()
+        )
+    }
 
     fun togglePasswordVisibility() {
         _authState.value = _authState.value.copy(
@@ -114,8 +130,16 @@ class AuthViewModel @Inject constructor(
             _authState.value = _authState.value.copy(isLoading = true, error = null)
             try {
                 loginUseCase(_authState.value.username, _authState.value.password)
+                saveBiometricCredentialsUseCase(
+                    username = _authState.value.username,
+                    password = _authState.value.password
+                )
 
-                _authState.value = _authState.value.copy(isLoading = false)
+                _authState.value = _authState.value.copy(
+                    isLoading = false,
+                    biometricError = null,
+                    isBiometricLoginAvailable = isBiometricLoginAvailableUseCase()
+                )
                 onSuccess()
             } catch (e: Exception) {
                 _authState.value = _authState.value.copy(
@@ -124,6 +148,44 @@ class AuthViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun loginWithBiometrics(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _authState.value = _authState.value.copy(isLoading = true, biometricError = null, error = null)
+
+            try {
+                val credentials = getBiometricCredentialsUseCase()
+                if (credentials == null) {
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        biometricError = "No hay credenciales guardadas para usar huella"
+                    )
+                    return@launch
+                }
+
+                loginUseCase(credentials.username, credentials.password)
+                _authState.value = applyValidation(
+                    _authState.value.copy(
+                        username = credentials.username,
+                        password = credentials.password,
+                        isLoading = false,
+                        biometricError = null,
+                        isBiometricLoginAvailable = isBiometricLoginAvailableUseCase()
+                    )
+                )
+                onSuccess()
+            } catch (e: Exception) {
+                _authState.value = _authState.value.copy(
+                    isLoading = false,
+                    biometricError = "No fue posible iniciar con huella: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun onBiometricPromptError(message: String) {
+        _authState.value = _authState.value.copy(biometricError = message)
     }
 
     fun register(onSuccess: () -> Unit) {

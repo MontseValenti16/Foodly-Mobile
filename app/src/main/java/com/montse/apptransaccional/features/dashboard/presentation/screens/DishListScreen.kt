@@ -27,7 +27,6 @@ import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.Da
 fun DishListScreen(
     onCreate: () -> Unit,
     onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -62,7 +61,7 @@ fun DishListScreen(
                     DishCard(
                         dish = dish,
                         onEdit = onEdit,
-                        onDelete = onDelete,
+                        onDelete = viewModel::deleteDish,
                         accentColor = foodlyPink
                     )
                 }

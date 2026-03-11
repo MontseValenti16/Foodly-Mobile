@@ -1,5 +1,8 @@
 package com.montse.apptransaccional.features.auth.presentation.screens
 
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.fragment.app.FragmentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,17 +10,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -26,20 +32,26 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.montse.apptransaccional.R
 import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModel
-import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModelFactory
 
 @Composable
 fun LoginScreen(
-    factory: AuthViewModelFactory,
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val viewModel: AuthViewModel = viewModel(factory = factory)
     val state by viewModel.authState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+    val mainExecutor = remember(context) { ContextCompat.getMainExecutor(context) }
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshBiometricAvailability()
+    }
 
     val FoodlyPink = Color(0xFFE91E63)
 
@@ -88,13 +100,13 @@ fun LoginScreen(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = state.email,
+            value = state.username,
             onValueChange = {
-                viewModel.onEmailChange(it)
+                viewModel.onUsernameChange(it)
             },
-            label = { Text("Email Address") },
-            placeholder = { Text("ejemplo@correo.com") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FoodlyPink) },
+            label = { Text("Username") },
+            placeholder = { Text("carlos_test_01_01") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FoodlyPink) },
             shape = RoundedCornerShape(15.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = FoodlyPink,
@@ -103,12 +115,12 @@ fun LoginScreen(
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black
             ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
             singleLine = true,
-            isError = state.shouldShowEmailError,
+            isError = state.shouldShowUsernameError,
             supportingText = {
-                if (state.shouldShowEmailError) {
-                    Text(text = state.emailError ?: "", color = Color.Red)
+                if (state.shouldShowUsernameError) {
+                    Text(text = state.usernameError ?: "", color = Color.Red)
                 }
             }
         )
@@ -165,6 +177,11 @@ fun LoginScreen(
             Text(state.error!!, color = Color.Red, fontSize = 14.sp)
         }
 
+        if (state.biometricError != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(state.biometricError!!, color = Color.Red, fontSize = 13.sp)
+        }
+
         Spacer(modifier = Modifier.height(30.dp))
 
         if (state.isLoading) {
@@ -182,6 +199,70 @@ fun LoginScreen(
                 shape = RoundedCornerShape(15.dp)
             ) {
                 Text("Login", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            }
+
+            if (state.isBiometricLoginAvailable) {
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    onClick = {
+                        if (activity == null) {
+                            viewModel.onBiometricPromptError("No fue posible abrir el lector de huella")
+                            return@OutlinedButton
+                        }
+
+                        val canAuthenticate = BiometricManager.from(context).canAuthenticate(
+                            BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                                BiometricManager.Authenticators.BIOMETRIC_WEAK
+                        )
+
+                        if (canAuthenticate != BiometricManager.BIOMETRIC_SUCCESS) {
+                            viewModel.onBiometricPromptError("La huella no esta disponible en este dispositivo")
+                            return@OutlinedButton
+                        }
+
+                        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                            .setTitle("Iniciar sesion con huella")
+                            .setSubtitle("Confirma tu identidad para continuar")
+                            .setNegativeButtonText("Cancelar")
+                            .build()
+
+                        val prompt = BiometricPrompt(
+                            activity,
+                            mainExecutor,
+                            object : BiometricPrompt.AuthenticationCallback() {
+                                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                                    super.onAuthenticationSucceeded(result)
+                                    viewModel.loginWithBiometrics(onLoginSuccess)
+                                }
+
+                                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                                    super.onAuthenticationError(errorCode, errString)
+                                    viewModel.onBiometricPromptError(errString.toString())
+                                }
+
+                                override fun onAuthenticationFailed() {
+                                    super.onAuthenticationFailed()
+                                    viewModel.onBiometricPromptError("Huella no reconocida")
+                                }
+                            }
+                        )
+
+                        prompt.authenticate(promptInfo)
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = FoodlyPink),
+                    shape = RoundedCornerShape(15.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Fingerprint,
+                        contentDescription = null,
+                        tint = FoodlyPink
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Login con huella", fontWeight = FontWeight.Bold)
+                }
             }
         }
 

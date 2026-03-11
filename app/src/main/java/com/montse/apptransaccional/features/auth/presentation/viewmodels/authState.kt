@@ -17,5 +17,7 @@ data class AuthState(
     val shouldShowEmailError: Boolean = false,
     val shouldShowPasswordError: Boolean = false,
     val isLoginValid: Boolean = false,
-    val isRegisterValid: Boolean = false
+    val isRegisterValid: Boolean = false,
+    val isBiometricLoginAvailable: Boolean = false,
+    val biometricError: String? = null
 )
