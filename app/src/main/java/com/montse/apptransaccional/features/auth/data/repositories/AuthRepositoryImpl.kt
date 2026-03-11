@@ -11,8 +11,8 @@ class AuthRepositoryImpl(
     private val api: RestaurantApi,
     private val sessionManager: SessionManager
 ) : AuthRepository {
-    override suspend fun login(username: String, pass: String): AuthResponse {
-        val response = api.login(LoginRequest(username, pass))
+    override suspend fun login(email: String, pass: String): AuthResponse {
+        val response = api.login(LoginRequest(email, pass))
         sessionManager.saveToken(response.token)
         return response
     }

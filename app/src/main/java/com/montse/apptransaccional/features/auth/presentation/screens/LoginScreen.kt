@@ -1,16 +1,18 @@
 package com.montse.apptransaccional.features.auth.presentation.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,17 +26,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.montse.apptransaccional.R
 import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModel
+import com.montse.apptransaccional.features.auth.presentation.viewmodels.AuthViewModelFactory
 
 @Composable
 fun LoginScreen(
+    factory: AuthViewModelFactory,
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    onNavigateToRegister: () -> Unit
 ) {
+    val viewModel: AuthViewModel = viewModel(factory = factory)
     val state by viewModel.authState.collectAsStateWithLifecycle()
 
     val FoodlyPink = Color(0xFFE91E63)
@@ -49,10 +53,10 @@ fun LoginScreen(
 
         Surface(
             modifier = Modifier
-                .size(150.dp)
+                .size(180.dp)
                 .padding(4.dp),
             shape = CircleShape,
-            shadowElevation = 20.dp,
+            shadowElevation = 10.dp,
             color = Color.White
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -84,13 +88,13 @@ fun LoginScreen(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = state.username,
+            value = state.email,
             onValueChange = {
-                viewModel.onUsernameChange(it)
+                viewModel.onEmailChange(it)
             },
-            label = { Text("Username") },
-            placeholder = { Text("MikiMono") },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FoodlyPink) },
+            label = { Text("Email Address") },
+            placeholder = { Text("ejemplo@correo.com") },
+            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FoodlyPink) },
             shape = RoundedCornerShape(15.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = FoodlyPink,
@@ -99,12 +103,12 @@ fun LoginScreen(
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black
             ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             singleLine = true,
-            isError = state.shouldShowUsernameError,
+            isError = state.shouldShowEmailError,
             supportingText = {
-                if (state.shouldShowUsernameError) {
-                    Text(text = state.usernameError ?: "", color = Color.Red)
+                if (state.shouldShowEmailError) {
+                    Text(text = state.emailError ?: "", color = Color.Red)
                 }
             }
         )
@@ -160,6 +164,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(10.dp))
             Text(state.error!!, color = Color.Red, fontSize = 14.sp)
         }
+
         Spacer(modifier = Modifier.height(30.dp))
 
         if (state.isLoading) {
@@ -181,5 +186,15 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(20.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Don't have an account? ", color = Color.Gray)
+            Text(
+                text = "Sign up",
+                color = FoodlyPink,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onNavigateToRegister() }
+            )
+        }
     }
 }
