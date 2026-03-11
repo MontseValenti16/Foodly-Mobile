@@ -5,9 +5,13 @@ import com.montse.apptransaccional.core.network.RestaurantApi
 import com.montse.apptransaccional.features.dashboard.data.repositories.AreaRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.data.repositories.CategoryRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.data.repositories.DishRepositoryImpl
+import com.montse.apptransaccional.features.dashboard.data.repositories.CameraRepositoryImpl
+import com.montse.apptransaccional.features.dashboard.data.repositories.VibrationRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.domain.repositories.AreaRepository
 import com.montse.apptransaccional.features.dashboard.domain.repositories.CategoryRepository
 import com.montse.apptransaccional.features.dashboard.domain.repositories.DishRepository
+import com.montse.apptransaccional.features.dashboard.domain.repositories.CameraRepository
+import com.montse.apptransaccional.features.dashboard.domain.repositories.VibrationRepository
 import com.montse.apptransaccional.features.dashboard.domain.usecases.*
 import dagger.Module
 import dagger.Provides
@@ -39,6 +43,18 @@ object DashboardModule {
     @Singleton
     fun provideAreaRepository(api: RestaurantApi): AreaRepository {
         return AreaRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCameraRepository(@ApplicationContext context: Context): CameraRepository {
+        return CameraRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVibrationRepository(@ApplicationContext context: Context): VibrationRepository {
+        return VibrationRepositoryImpl(context)
     }
 
     @Provides
@@ -81,5 +97,17 @@ object DashboardModule {
     @Singleton
     fun provideGetAreasUseCase(repository: AreaRepository): GetAreasUseCase {
         return GetAreasUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateTempImageUriUseCase(repository: CameraRepository): CreateTempImageUriUseCase {
+        return CreateTempImageUriUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVibrateUseCase(repository: VibrationRepository): VibrateUseCase {
+        return VibrateUseCase(repository)
     }
 }

@@ -1,6 +1,8 @@
 package com.montse.apptransaccional.features.dashboard.data.repositories
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.webkit.MimeTypeMap
 import com.montse.apptransaccional.core.network.RestaurantApi
@@ -13,6 +15,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 class DishRepositoryImpl @Inject constructor(
@@ -38,15 +41,9 @@ class DishRepositoryImpl @Inject constructor(
         val disponible = (if (dish.disponible) 1 else 0).toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
         val imagePart = imageUri?.let { uri ->
-            val contentResolver = context.contentResolver
-            val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
-            val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "jpg"
-            
-            val inputStream = contentResolver.openInputStream(uri)
-            val bytes = inputStream?.readBytes() ?: return@let null
-            val requestFile = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
-            
-            MultipartBody.Part.createFormData("image", "upload_$extension.$extension", requestFile)
+            val compressedBytes = compressImage(uri) ?: return@let null
+            val requestFile = compressedBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("image", "dish_photo.jpg", requestFile)
         }
 
         return api.createDish(
@@ -75,6 +72,36 @@ class DishRepositoryImpl @Inject constructor(
 
     override suspend fun deleteDish(id: Int) {
         api.deleteDish(id)
+    }
+
+    /**
+     * Comprime la imagen para evitar el error 413 (Entity Too Large)
+     */
+    private fun compressImage(uri: Uri): ByteArray? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
+            
+            // Redimensionar si es muy grande (máximo 1024px de ancho o alto)
+            val maxSize = 1024
+            val width = originalBitmap.width
+            val height = originalBitmap.height
+            
+            val scaledBitmap = if (width > maxSize || height > maxSize) {
+                val ratio = width.toFloat() / height.toFloat()
+                val targetWidth = if (ratio > 1) maxSize else (maxSize * ratio).toInt()
+                val targetHeight = if (ratio > 1) (maxSize / ratio).toInt() else maxSize
+                Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, true)
+            } else {
+                originalBitmap
+            }
+
+            val outputStream = ByteArrayOutputStream()
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+            outputStream.toByteArray()
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 
