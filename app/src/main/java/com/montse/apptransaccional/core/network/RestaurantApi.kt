@@ -3,10 +3,12 @@ package com.montse.apptransaccional.core.network
 import com.montse.apptransaccional.features.auth.data.datasources.remote.AuthResponse
 import com.montse.apptransaccional.features.auth.data.datasources.remote.LoginRequest
 import com.montse.apptransaccional.features.auth.data.datasources.remote.RegisterRequest
+import com.montse.apptransaccional.features.auth.data.datasources.remote.UserData
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.CreateDishRequest
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishDto
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishResponse
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.UpdateDishRequest
+import com.montse.apptransaccional.features.users.data.datasources.remote.UserResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -21,6 +23,23 @@ interface RestaurantApi {
     @POST("users/auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
 
+    // User endpoints
+    @GET("users")
+    suspend fun getUsers(): List<UserData>
+
+    @GET("users/{id}")
+    suspend fun getUserById(@Path("id") id: Int): UserResponse
+
+    @POST("users")
+    suspend fun createUser(@Body user: UserData): UserData
+
+    @PUT("users/{id}")
+    suspend fun updateUser(@Path("id") id: Int, @Body user: UserData): UserData
+
+    @DELETE("users/{id}")
+    suspend fun deleteUser(@Path("id") id: Int): Map<String, Any>
+
+    // Dish endpoints
     @GET("dishes")
     suspend fun getDishes(): List<DishDto>
 
@@ -39,4 +58,3 @@ interface RestaurantApi {
     @DELETE("dishes/{id}")
     suspend fun deleteDish(@Path("id") id: Int): Map<String, Any>
 }
-

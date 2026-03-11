@@ -27,6 +27,7 @@ import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.Da
 fun DishListScreen(
     onCreate: () -> Unit,
     onEdit: (Int) -> Unit,
+    onProfileClick: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -42,7 +43,10 @@ fun DishListScreen(
             .padding(5.dp, 40.dp ),
         verticalArrangement = Arrangement.Top
     ) {
-        DashboardHeader(onCreate = onCreate)
+        DashboardHeader(
+            onCreate = onCreate,
+            onProfileClick = onProfileClick
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

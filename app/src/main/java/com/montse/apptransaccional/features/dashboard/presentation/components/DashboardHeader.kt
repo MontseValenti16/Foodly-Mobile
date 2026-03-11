@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -26,7 +27,10 @@ import androidx.compose.ui.unit.dp
 import com.montse.apptransaccional.R
 
 @Composable
-fun DashboardHeader(onCreate: () -> Unit) {
+fun DashboardHeader(
+    onCreate: () -> Unit,
+    onProfileClick: () -> Unit
+) {
     val foodlyPink = Color(0xFFE91E63)
     Row(
         modifier = Modifier
@@ -57,13 +61,23 @@ fun DashboardHeader(onCreate: () -> Unit) {
                 color = Color.White
             )
         }
-        IconButton(onClick = onCreate) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Crear",
-                tint = Color.White,
-                modifier = Modifier.size(28.dp)
-            )
+        Row {
+            IconButton(onClick = onProfileClick) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Perfil",
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            IconButton(onClick = onCreate) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Crear",
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
         }
     }
 }

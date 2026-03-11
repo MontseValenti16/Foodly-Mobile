@@ -14,6 +14,7 @@ class AuthRepositoryImpl(
     override suspend fun login(username: String, pass: String): AuthResponse {
         val response = api.login(LoginRequest(username, pass))
         sessionManager.saveToken(response.token)
+        sessionManager.saveUserId(response.userId)
         return response
     }
     override suspend fun register(username: String, email: String, pass: String): AuthResponse {
