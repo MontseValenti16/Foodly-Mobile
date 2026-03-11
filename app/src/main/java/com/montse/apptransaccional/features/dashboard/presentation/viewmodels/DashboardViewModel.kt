@@ -21,7 +21,8 @@ class DashboardViewModel @Inject constructor(
     private val updateDishUseCase: UpdateDishUseCase,
     private val deleteDishUseCase: DeleteDishUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
-    private val getAreasUseCase: GetAreasUseCase
+    private val getAreasUseCase: GetAreasUseCase,
+    private val createTempImageUriUseCase: CreateTempImageUriUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
@@ -120,6 +121,9 @@ class DashboardViewModel @Inject constructor(
         _state.value = _state.value.copy(imageUri = uri)
     }
 
+    // Cambiado a retorno directo para mayor estabilidad en la UI
+    fun getTempImageUri(): Uri? = createTempImageUriUseCase()
+
     fun onSelectDish(id: Int) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -137,7 +141,7 @@ class DashboardViewModel @Inject constructor(
                     selectedCategoryId = dish.categoryId,
                     selectedCategoryName = dish.categoria ?: "Select category",
                     selectedAreaId = dish.areaId,
-                    selectedAreaName = "Area selected" // Can be improved by finding name in list
+                    selectedAreaName = "Area selected"
                 ))
             } catch (e: Exception) {
                 _state.value = _state.value.copy(isLoading = false, error = e.localizedMessage)
@@ -169,7 +173,6 @@ class DashboardViewModel @Inject constructor(
             markSubmitAttempted()
             val priceValue = _state.value.precio.trim().toDoubleOrNull()
             
-            // Verificamos que todos los campos obligatorios estén presentes
             if (!_state.value.isFormValid || priceValue == null || _state.value.selectedCategoryId == null || _state.value.selectedAreaId == null) {
                 if (_state.value.selectedCategoryId == null) {
                     _state.value = _state.value.copy(error = "Please select a category")

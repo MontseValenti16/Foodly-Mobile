@@ -19,6 +19,7 @@ data class DashboardState(
     val selectedAreaName: String = "Select area",
     val disponible: Boolean = true,
     val imageUri: Uri? = null,
+    val tempCameraUri: Uri? = null, // Nuevo campo para persistencia
     val nombreError: String? = null,
     val precioError: String? = null,
     val shouldShowNombreError: Boolean = false,
