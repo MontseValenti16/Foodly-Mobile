@@ -1,3 +1,7 @@
 package com.montse.apptransaccional.features.dashboard.data.datasources.remote
 
-data class DishResponse(val dish: DishDto)
+import com.google.gson.annotations.SerializedName
+
+data class DishResponse(
+    @SerializedName("product") val product: DishDto
+)

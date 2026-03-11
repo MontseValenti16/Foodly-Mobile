@@ -6,5 +6,8 @@ data class Dish(
     val descripcion: String?,
     val precio: Double,
     val categoria: String?,
-    val disponible: Boolean
+    val disponible: Boolean,
+    val imageUrl: String? = null,
+    val areaId: Int? = null,
+    val categoryId: Int? = null
 )

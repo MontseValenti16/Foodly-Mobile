@@ -1,5 +1,7 @@
 package com.montse.apptransaccional.features.dashboard.presentation.screens
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.montse.apptransaccional.features.dashboard.presentation.components.DishForm
@@ -12,7 +14,8 @@ fun EditDishScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     DishForm(
-        title = "Editar platillo",
+        title = "Edit dish",
+        icon = Icons.Default.Edit,
         viewModel = viewModel,
         onLoad = { viewModel.initEditForm(dishId) },
         onSave = { viewModel.saveDish { onBack() } },

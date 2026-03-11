@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.montse.apptransaccional.R
 import com.montse.apptransaccional.features.dashboard.domain.models.Dish
 
@@ -31,6 +32,8 @@ fun DishCard(
     accentColor: Color = Color(0xFFE91E63)
 ) {
     val availableColor = if (dish.disponible) Color(0xFF2ECC71) else Color(0xFFB0B0B0)
+    val baseUrl = "https://foodly.mangelg.space"
+    val fullImageUrl = if (dish.imageUrl != null) "$baseUrl${dish.imageUrl}" else null
 
     Card(
         modifier = Modifier
@@ -48,12 +51,21 @@ fun DishCard(
                     .fillMaxWidth()
                     .height(100.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_foodly), // Placeholder or use dish.imagen if available
-                    contentDescription = dish.nombre,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                if (fullImageUrl != null) {
+                    AsyncImage(
+                        model = fullImageUrl,
+                        contentDescription = dish.nombre,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_foodly),
+                        contentDescription = dish.nombre,
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
 
             // Content Section
@@ -67,7 +79,8 @@ fun DishCard(
                         text = dish.nombre,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = Color.Black
+                        color = Color.Black,
+                        maxLines = 1
                     )
                     
                     // Stock badge

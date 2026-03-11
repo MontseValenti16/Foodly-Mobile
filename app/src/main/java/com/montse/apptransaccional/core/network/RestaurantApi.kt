@@ -4,17 +4,15 @@ import com.montse.apptransaccional.features.auth.data.datasources.remote.AuthRes
 import com.montse.apptransaccional.features.auth.data.datasources.remote.LoginRequest
 import com.montse.apptransaccional.features.auth.data.datasources.remote.RegisterRequest
 import com.montse.apptransaccional.features.auth.data.datasources.remote.UserData
-import com.montse.apptransaccional.features.dashboard.data.datasources.remote.CreateDishRequest
+import com.montse.apptransaccional.features.dashboard.data.datasources.remote.AreaDto
+import com.montse.apptransaccional.features.dashboard.data.datasources.remote.CategoryDto
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishDto
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishResponse
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.UpdateDishRequest
 import com.montse.apptransaccional.features.users.data.datasources.remote.UserResponse
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.http.*
 
 interface RestaurantApi {
     @POST("users/auth/login")
@@ -46,8 +44,17 @@ interface RestaurantApi {
     @GET("dishes/{id}")
     suspend fun getDishById(@Path("id") id: Int): DishResponse
 
+    @Multipart
     @POST("dishes")
-    suspend fun createDish(@Body request: CreateDishRequest): DishDto
+    suspend fun createDish(
+        @Part image: MultipartBody.Part?,
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody?,
+        @Part("price") price: RequestBody,
+        @Part("category_id") categoryId: RequestBody,
+        @Part("area_id") areaId: RequestBody,
+        @Part("disponible") disponible: RequestBody
+    ): DishDto
 
     @PUT("dishes/{id}")
     suspend fun updateDish(
@@ -57,4 +64,12 @@ interface RestaurantApi {
 
     @DELETE("dishes/{id}")
     suspend fun deleteDish(@Path("id") id: Int): Map<String, Any>
+
+    // Category endpoints
+    @GET("categories")
+    suspend fun getCategories(): List<CategoryDto>
+
+    // Area endpoints
+    @GET("areas")
+    suspend fun getAreas(): List<AreaDto>
 }
