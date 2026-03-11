@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -56,35 +58,35 @@ fun DishForm(
     var expandedCategory by remember { mutableStateOf(false) }
     var expandedArea by remember { mutableStateOf(false) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+    var pendingImageUri by remember { mutableStateOf<Uri?>(null) }
     
-    // URI temporal persistente
     var tempCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
-    // Launcher para la galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        if (uri != null) viewModel.onImageSelected(uri)
+        if (uri != null) {
+            pendingImageUri = uri
+            showConfirmationDialog = true
+        }
     }
 
-    // Launcher para la cámara
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempCameraUri != null) {
-            viewModel.onImageSelected(tempCameraUri)
+            pendingImageUri = tempCameraUri
+            showConfirmationDialog = true
         }
     }
 
-    // Launcher para permisos de Galería
     val galleryPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) galleryLauncher.launch("image/*")
-        else Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
     }
 
-    // Launcher para permisos de Cámara
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -92,13 +94,61 @@ fun DishForm(
             val uri = viewModel.getTempImageUri()
             tempCameraUri = uri
             if (uri != null) cameraLauncher.launch(uri)
-        } else {
-            Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 
     LaunchedEffect(Unit) {
         onLoad()
+    }
+
+    // Alerta de confirmación con vibración triple
+    if (showConfirmationDialog) {
+        LaunchedEffect(Unit) {
+            viewModel.vibrateTriple() // ¡Ahora vibra 3 veces!
+        }
+
+        AlertDialog(
+            onDismissRequest = { showConfirmationDialog = false },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = Color.White,
+            icon = {
+                Icon(Icons.Outlined.Info, contentDescription = null, tint = foodlyPink, modifier = Modifier.size(40.dp))
+            },
+            title = {
+                Text(
+                    text = "Confirm Image",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Text(
+                    text = "Esta imagen no se podrá modificar una vez guardada. ¿Es la imagen correcta para este platillo?",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.onImageSelected(pendingImageUri)
+                        showConfirmationDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = foodlyPink),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Confirmar", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmationDialog = false }) {
+                    Text("Cancelar", color = foodlyPink)
+                }
+            }
+        )
     }
 
     if (showImageSourceDialog) {

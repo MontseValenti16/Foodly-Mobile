@@ -22,7 +22,8 @@ class DashboardViewModel @Inject constructor(
     private val deleteDishUseCase: DeleteDishUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val getAreasUseCase: GetAreasUseCase,
-    private val createTempImageUriUseCase: CreateTempImageUriUseCase
+    private val createTempImageUriUseCase: CreateTempImageUriUseCase,
+    private val vibrateUseCase: VibrateUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
@@ -121,7 +122,10 @@ class DashboardViewModel @Inject constructor(
         _state.value = _state.value.copy(imageUri = uri)
     }
 
-    // Cambiado a retorno directo para mayor estabilidad en la UI
+    fun vibrateTriple() {
+        vibrateUseCase.vibrateTriple()
+    }
+
     fun getTempImageUri(): Uri? = createTempImageUriUseCase()
 
     fun onSelectDish(id: Int) {

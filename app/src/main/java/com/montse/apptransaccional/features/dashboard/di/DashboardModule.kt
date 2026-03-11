@@ -6,10 +6,12 @@ import com.montse.apptransaccional.features.dashboard.data.repositories.AreaRepo
 import com.montse.apptransaccional.features.dashboard.data.repositories.CategoryRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.data.repositories.DishRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.data.repositories.CameraRepositoryImpl
+import com.montse.apptransaccional.features.dashboard.data.repositories.VibrationRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.domain.repositories.AreaRepository
 import com.montse.apptransaccional.features.dashboard.domain.repositories.CategoryRepository
 import com.montse.apptransaccional.features.dashboard.domain.repositories.DishRepository
 import com.montse.apptransaccional.features.dashboard.domain.repositories.CameraRepository
+import com.montse.apptransaccional.features.dashboard.domain.repositories.VibrationRepository
 import com.montse.apptransaccional.features.dashboard.domain.usecases.*
 import dagger.Module
 import dagger.Provides
@@ -47,6 +49,12 @@ object DashboardModule {
     @Singleton
     fun provideCameraRepository(@ApplicationContext context: Context): CameraRepository {
         return CameraRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVibrationRepository(@ApplicationContext context: Context): VibrationRepository {
+        return VibrationRepositoryImpl(context)
     }
 
     @Provides
@@ -95,5 +103,11 @@ object DashboardModule {
     @Singleton
     fun provideCreateTempImageUriUseCase(repository: CameraRepository): CreateTempImageUriUseCase {
         return CreateTempImageUriUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVibrateUseCase(repository: VibrationRepository): VibrateUseCase {
+        return VibrateUseCase(repository)
     }
 }
