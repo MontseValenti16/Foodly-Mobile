@@ -5,6 +5,7 @@ import com.montse.apptransaccional.features.users.data.repositories.UserReposito
 import com.montse.apptransaccional.features.users.domain.repositories.UserRepository
 import com.montse.apptransaccional.features.users.domain.usecases.CreateUserUseCase
 import com.montse.apptransaccional.features.users.domain.usecases.DeleteUserUseCase
+import com.montse.apptransaccional.features.users.domain.usecases.GetRolesUseCase
 import com.montse.apptransaccional.features.users.domain.usecases.GetUserByIdUseCase
 import com.montse.apptransaccional.features.users.domain.usecases.GetUsersUseCase
 import com.montse.apptransaccional.features.users.domain.usecases.UpdateUserUseCase
@@ -52,5 +53,11 @@ object UsersModule {
     @Singleton
     fun provideDeleteUserUseCase(repository: UserRepository): DeleteUserUseCase {
         return DeleteUserUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetRolesUseCase(repository: UserRepository): GetRolesUseCase {
+        return GetRolesUseCase(repository)
     }
 }

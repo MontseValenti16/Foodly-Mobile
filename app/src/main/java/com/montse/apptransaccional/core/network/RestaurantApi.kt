@@ -9,6 +9,12 @@ import com.montse.apptransaccional.features.dashboard.data.datasources.remote.Ca
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishDto
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishResponse
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.UpdateDishRequest
+import com.montse.apptransaccional.features.tables.data.datasources.remote.CreateTableRequest
+import com.montse.apptransaccional.features.tables.data.datasources.remote.TableDto
+import com.montse.apptransaccional.features.tables.data.datasources.remote.TablesResponse
+import com.montse.apptransaccional.features.users.data.datasources.remote.CreateEmployeeRequest
+import com.montse.apptransaccional.features.users.data.datasources.remote.EmployeesResponse
+import com.montse.apptransaccional.features.users.data.datasources.remote.RolesResponse
 import com.montse.apptransaccional.features.users.data.datasources.remote.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -23,13 +29,13 @@ interface RestaurantApi {
 
     // User endpoints
     @GET("users")
-    suspend fun getUsers(): List<UserData>
+    suspend fun getUsers(): EmployeesResponse
 
     @GET("users/{id}")
     suspend fun getUserById(@Path("id") id: Int): UserResponse
 
-    @POST("users")
-    suspend fun createUser(@Body user: UserData): UserData
+    @POST("users/auth/register")
+    suspend fun createUser(@Body user: CreateEmployeeRequest): AuthResponse
 
     @PUT("users/{id}")
     suspend fun updateUser(@Path("id") id: Int, @Body user: UserData): UserData
@@ -65,6 +71,16 @@ interface RestaurantApi {
     @DELETE("dishes/{id}")
     suspend fun deleteDish(@Path("id") id: Int): Map<String, Any>
 
+    // Table endpoints
+    @GET("tables")
+    suspend fun getTables(): TablesResponse
+
+    @POST("tables")
+    suspend fun createTable(@Body request: CreateTableRequest): TableDto
+
+    @DELETE("tables/{id}")
+    suspend fun deleteTable(@Path("id") id: Int): Map<String, Any>
+
     // Category endpoints
     @GET("categories")
     suspend fun getCategories(): List<CategoryDto>
@@ -72,4 +88,8 @@ interface RestaurantApi {
     // Area endpoints
     @GET("areas")
     suspend fun getAreas(): List<AreaDto>
+
+    // Role endpoints
+    @GET("roles")
+    suspend fun getRoles(): RolesResponse
 }

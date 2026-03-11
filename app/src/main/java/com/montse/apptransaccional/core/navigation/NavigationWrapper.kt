@@ -1,7 +1,5 @@
 package com.montse.apptransaccional.core.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -11,7 +9,11 @@ import androidx.navigation.compose.rememberNavController
 import com.montse.apptransaccional.features.auth.presentation.screens.LoginScreen
 import com.montse.apptransaccional.features.auth.presentation.screens.RegisterScreen
 import com.montse.apptransaccional.features.dashboard.presentation.screens.*
+import com.montse.apptransaccional.features.tables.presentation.screens.CreateTableScreen
+import com.montse.apptransaccional.features.tables.presentation.screens.TablesScreen
+import com.montse.apptransaccional.features.users.presentation.screens.CreateUserScreen
 import com.montse.apptransaccional.features.users.presentation.screens.ProfileScreen
+import com.montse.apptransaccional.features.users.presentation.screens.UsersManagementScreen
 import com.montse.apptransaccional.features.users.presentation.viewmodels.ProfileViewModel
 
 @Composable
@@ -67,13 +69,29 @@ fun NavigationWrapper() {
         composable("tables") {
             TablesScreen(
                 onNavigate = { route -> navController.navigate(route) },
-                currentRoute = currentRoute
+                currentRoute = currentRoute,
+                onCreate = { navController.navigate("tables/create") }
+            )
+        }
+
+        composable("tables/create") {
+            CreateTableScreen(
+                onBack = { navController.popBackStack() }
             )
         }
 
         composable("profiles") {
-            // Aquí puedes implementar una pantalla similar para la gestión de usuarios
-            Box { Text("Gestión de Usuarios") }
+            UsersManagementScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute,
+                onCreate = { navController.navigate("profiles/create") }
+            )
+        }
+
+        composable("profiles/create") {
+            CreateUserScreen(
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable("dashboard/create") {
