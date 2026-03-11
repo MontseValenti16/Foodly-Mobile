@@ -10,6 +10,15 @@ sealed interface Screen {
     data object Dashboard : Screen
 
     @Serializable
+    data object Sales : Screen
+
+    @Serializable
+    data object Tables : Screen
+
+    @Serializable
+    data object Profiles : Screen
+
+    @Serializable
     data object CreateDish : Screen
 
     @Serializable

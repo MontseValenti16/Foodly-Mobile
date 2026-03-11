@@ -2,17 +2,10 @@ package com.montse.apptransaccional.features.dashboard.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,60 +17,48 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.montse.apptransaccional.R
 
 @Composable
-fun DashboardHeader(
-    onCreate: () -> Unit,
-    onProfileClick: () -> Unit
-) {
+fun DashboardHeader(onCreate: () -> Unit) {
     val foodlyPink = Color(0xFFE91E63)
-    Row(
+    
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(foodlyPink, shape = MaterialTheme.shapes.large)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(foodlyPink, shape = RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Card(
-                shape = MaterialTheme.shapes.small,
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_foodly),
-                    contentDescription = "Logo",
-                    modifier = Modifier
-                        .size(50.dp)
-                        .padding(1.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo_foodly),
+                contentDescription = "Logo",
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Foodly",
-                style = MaterialTheme.typography.headlineMedium,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
         }
-        Row {
-            IconButton(onClick = onProfileClick) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Perfil",
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-            IconButton(onClick = onCreate) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Crear",
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+        
+        IconButton(
+            onClick = onCreate,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add",
+                tint = Color.White,
+                modifier = Modifier.size(28.dp)
+            )
         }
     }
 }

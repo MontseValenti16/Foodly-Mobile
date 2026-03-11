@@ -1,22 +1,24 @@
 package com.montse.apptransaccional.core.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.montse.apptransaccional.features.auth.presentation.screens.LoginScreen
 import com.montse.apptransaccional.features.auth.presentation.screens.RegisterScreen
-import com.montse.apptransaccional.features.dashboard.presentation.screens.CreateDishScreen
-import com.montse.apptransaccional.features.dashboard.presentation.screens.DishListScreen
-import com.montse.apptransaccional.features.dashboard.presentation.screens.EditDishScreen
+import com.montse.apptransaccional.features.dashboard.presentation.screens.*
 import com.montse.apptransaccional.features.users.presentation.screens.ProfileScreen
 import com.montse.apptransaccional.features.users.presentation.viewmodels.ProfileViewModel
-
 
 @Composable
 fun NavigationWrapper() {
     val navController = rememberNavController()
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route ?: "login"
 
     NavHost(navController = navController, startDestination = "login") {
 
@@ -32,6 +34,7 @@ fun NavigationWrapper() {
                 }
             )
         }
+        
         composable("register") {
             RegisterScreen(
                 onRegisterSuccess = {
@@ -49,8 +52,28 @@ fun NavigationWrapper() {
             DishListScreen(
                 onCreate = { navController.navigate("dashboard/create") },
                 onEdit = { id -> navController.navigate("dashboard/edit/$id") },
-                onProfileClick = { navController.navigate("profile") }
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute
             )
+        }
+
+        composable("sales") {
+            SalesScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute
+            )
+        }
+
+        composable("tables") {
+            TablesScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute
+            )
+        }
+
+        composable("profiles") {
+            // Aquí puedes implementar una pantalla similar para la gestión de usuarios
+            Box { Text("Gestión de Usuarios") }
         }
 
         composable("dashboard/create") {
@@ -72,7 +95,8 @@ fun NavigationWrapper() {
             val viewModel: ProfileViewModel = hiltViewModel()
             ProfileScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() }
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute
             )
         }
     }
