@@ -12,12 +12,12 @@ data class AuthState(
     val usernameError: String? = null,
     val emailError: String? = null,
     val passwordError: String? = null,
+    val biometricError: String? = null,
     val shouldShowNameError: Boolean = false,
     val shouldShowUsernameError: Boolean = false,
     val shouldShowEmailError: Boolean = false,
     val shouldShowPasswordError: Boolean = false,
     val isLoginValid: Boolean = false,
     val isRegisterValid: Boolean = false,
-    val isBiometricLoginAvailable: Boolean = false,
-    val biometricError: String? = null
+    val isBiometricLoginAvailable: Boolean = false
 )

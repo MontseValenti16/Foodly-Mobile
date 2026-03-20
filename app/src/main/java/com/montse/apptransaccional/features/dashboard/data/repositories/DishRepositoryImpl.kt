@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.webkit.MimeTypeMap
 import com.montse.apptransaccional.core.network.RestaurantApi
+import com.montse.apptransaccional.features.dashboard.data.datasources.local.DishDao
+import com.montse.apptransaccional.features.dashboard.data.datasources.local.toDomain
+import com.montse.apptransaccional.features.dashboard.data.datasources.local.toEntity
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.DishDto
 import com.montse.apptransaccional.features.dashboard.data.datasources.remote.UpdateDishRequest
 import com.montse.apptransaccional.features.dashboard.domain.models.Dish
@@ -13,28 +15,46 @@ import com.montse.apptransaccional.features.dashboard.domain.repositories.DishRe
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 class DishRepositoryImpl @Inject constructor(
     private val api: RestaurantApi,
+    private val dao: DishDao,
     @ApplicationContext private val context: Context
 ) : DishRepository {
 
     override suspend fun getDishes(): List<Dish> {
-        return api.getDishes().map { it.toDomain() }
+        return try {
+            val remoteDishes = api.getDishes()
+            val domainDishes = remoteDishes.map { it.toDomain() }
+            
+            // Sincronizar con base de datos local
+            dao.deleteAllDishes()
+            dao.insertDishes(domainDishes.map { it.toEntity() })
+            
+            domainDishes
+        } catch (e: Exception) {
+            // Si falla la red, cargar de Room
+            dao.getAllDishes().map { it.toDomain() }
+        }
     }
 
     override suspend fun getDishById(id: Int): Dish {
-        val response = api.getDishById(id)
-        return response.product.toDomain()
+        return try {
+            val response = api.getDishById(id)
+            val dish = response.product.toDomain()
+            dao.insertDishes(listOf(dish.toEntity()))
+            dish
+        } catch (e: Exception) {
+            dao.getDishById(id)?.toDomain() ?: throw e
+        }
     }
 
     override suspend fun createDish(dish: Dish, imageUri: Uri?): Dish {
         val name = dish.nombre.toRequestBody("text/plain".toMediaTypeOrNull())
-        val description = dish.descripcion?.toRequestBody("text/plain".toMediaTypeOrNull())
+        val description = (dish.descripcion ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
         val price = dish.precio.toString().toRequestBody("text/plain".toMediaTypeOrNull())
         val categoryId = (dish.categoryId?.toString() ?: "1").toRequestBody("text/plain".toMediaTypeOrNull())
         val areaId = (dish.areaId?.toString() ?: "1").toRequestBody("text/plain".toMediaTypeOrNull())
@@ -46,7 +66,7 @@ class DishRepositoryImpl @Inject constructor(
             MultipartBody.Part.createFormData("image", "dish_photo.jpg", requestFile)
         }
 
-        return api.createDish(
+        val createdDish = api.createDish(
             image = imagePart,
             name = name,
             description = description,
@@ -55,6 +75,9 @@ class DishRepositoryImpl @Inject constructor(
             areaId = areaId,
             disponible = disponible
         ).toDomain()
+        
+        dao.insertDishes(listOf(createdDish.toEntity()))
+        return createdDish
     }
 
     override suspend fun updateDish(dish: Dish, imageUri: Uri?) {
@@ -68,21 +91,18 @@ class DishRepositoryImpl @Inject constructor(
             isActive = true
         )
         api.updateDish(dish.id, request)
+        dao.insertDishes(listOf(dish.toEntity()))
     }
 
     override suspend fun deleteDish(id: Int) {
         api.deleteDish(id)
+        dao.getDishById(id)?.let { dao.deleteDish(it) }
     }
 
-    /**
-     * Comprime la imagen para evitar el error 413 (Entity Too Large)
-     */
     private fun compressImage(uri: Uri): ByteArray? {
         return try {
             val inputStream = context.contentResolver.openInputStream(uri)
             val originalBitmap = BitmapFactory.decodeStream(inputStream)
-            
-            // Redimensionar si es muy grande (máximo 1024px de ancho o alto)
             val maxSize = 1024
             val width = originalBitmap.width
             val height = originalBitmap.height
