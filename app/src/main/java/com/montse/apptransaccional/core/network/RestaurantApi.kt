@@ -12,6 +12,8 @@ import com.montse.apptransaccional.features.dashboard.data.datasources.remote.Up
 import com.montse.apptransaccional.features.tables.data.datasources.remote.CreateTableRequest
 import com.montse.apptransaccional.features.tables.data.datasources.remote.TableDto
 import com.montse.apptransaccional.features.tables.data.datasources.remote.TablesResponse
+import com.montse.apptransaccional.features.waiter.data.datasources.remote.CreateSessionRequest
+import com.montse.apptransaccional.features.waiter.data.datasources.remote.SessionDto
 import com.montse.apptransaccional.features.users.data.datasources.remote.CreateEmployeeRequest
 import com.montse.apptransaccional.features.users.data.datasources.remote.EmployeesResponse
 import com.montse.apptransaccional.features.users.data.datasources.remote.RolesResponse
@@ -92,4 +94,14 @@ interface RestaurantApi {
     // Role endpoints
     @GET("roles")
     suspend fun getRoles(): RolesResponse
+
+    // Session endpoints
+    @GET("sessions")
+    suspend fun getSessions(@Query("status") status: String? = null): List<SessionDto>
+
+    @POST("sessions")
+    suspend fun createSession(@Body request: CreateSessionRequest): SessionDto
+
+    @PUT("sessions/{id}/close")
+    suspend fun closeSession(@Path("id") id: Int): SessionDto
 }
