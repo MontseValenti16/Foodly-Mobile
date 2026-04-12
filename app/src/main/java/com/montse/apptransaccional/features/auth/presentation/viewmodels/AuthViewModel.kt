@@ -122,17 +122,17 @@ class AuthViewModel @Inject constructor(
         _authState.value = applyValidation(_authState.value)
     }
 
-    fun login(onSuccess: () -> Unit) {
+    fun login(onSuccess: (String) -> Unit) {
         viewModelScope.launch {
             markSubmitAttempted()
             if (!_authState.value.isLoginValid) return@launch
 
             _authState.value = _authState.value.copy(isLoading = true, error = null)
             try {
-                loginUseCase(_authState.value.username, _authState.value.password)
+                val response = loginUseCase(_authState.value.username, _authState.value.password)
                 saveBiometricCredentialsUseCase(
                     username = _authState.value.username,
-                    password = _authState.value.password
+                    pass = _authState.value.password
                 )
 
                 _authState.value = _authState.value.copy(
@@ -140,7 +140,7 @@ class AuthViewModel @Inject constructor(
                     biometricError = null,
                     isBiometricLoginAvailable = isBiometricLoginAvailableUseCase()
                 )
-                onSuccess()
+                onSuccess(response.userRole ?: "admin")
             } catch (e: Exception) {
                 _authState.value = _authState.value.copy(
                     isLoading = false,
@@ -150,7 +150,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun loginWithBiometrics(onSuccess: () -> Unit) {
+    fun loginWithBiometrics(onSuccess: (String) -> Unit) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, biometricError = null, error = null)
 
@@ -164,7 +164,7 @@ class AuthViewModel @Inject constructor(
                     return@launch
                 }
 
-                loginUseCase(credentials.username, credentials.password)
+                val response = loginUseCase(credentials.username, credentials.password)
                 _authState.value = applyValidation(
                     _authState.value.copy(
                         username = credentials.username,
@@ -174,7 +174,7 @@ class AuthViewModel @Inject constructor(
                         isBiometricLoginAvailable = isBiometricLoginAvailableUseCase()
                     )
                 )
-                onSuccess()
+                onSuccess(response.userRole ?: "admin")
             } catch (e: Exception) {
                 _authState.value = _authState.value.copy(
                     isLoading = false,

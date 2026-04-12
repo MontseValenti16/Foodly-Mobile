@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TablesViewModel @Inject constructor(
+class
+TablesViewModel @Inject constructor(
     private val getTablesUseCase: GetTablesUseCase,
     private val createTableUseCase: CreateTableUseCase,
     private val deleteTableUseCase: DeleteTableUseCase

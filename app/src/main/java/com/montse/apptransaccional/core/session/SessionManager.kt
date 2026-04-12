@@ -17,6 +17,12 @@ class SessionManager(context: Context) {
 
     fun getUserId(): Int = prefs.getInt(KEY_USER_ID, -1)
 
+    fun saveUserRole(role: String) {
+        prefs.edit().putString(KEY_USER_ROLE, role).apply()
+    }
+
+    fun getUserRole(): String? = prefs.getString(KEY_USER_ROLE, null)
+
     fun clear() {
         prefs.edit().clear().apply()
     }
@@ -25,5 +31,6 @@ class SessionManager(context: Context) {
         private const val PREFS_NAME = "app_session"
         private const val KEY_TOKEN = "token"
         private const val KEY_USER_ID = "user_id"
+        private const val KEY_USER_ROLE = "user_role"
     }
 }

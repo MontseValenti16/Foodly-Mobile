@@ -2,6 +2,7 @@ package com.montse.apptransaccional.features.dashboard.di
 
 import android.content.Context
 import com.montse.apptransaccional.core.network.RestaurantApi
+import com.montse.apptransaccional.features.dashboard.data.datasources.local.DishDao
 import com.montse.apptransaccional.features.dashboard.data.repositories.AreaRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.data.repositories.CategoryRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.data.repositories.DishRepositoryImpl
@@ -28,9 +29,10 @@ object DashboardModule {
     @Singleton
     fun provideDishRepository(
         api: RestaurantApi,
+        dishDao: DishDao,
         @ApplicationContext context: Context
     ): DishRepository {
-        return DishRepositoryImpl(api, context)
+        return DishRepositoryImpl(api, dishDao, context)
     }
 
     @Provides

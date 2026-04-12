@@ -52,8 +52,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    
+    kapt(libs.androidx.room.compiler)
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

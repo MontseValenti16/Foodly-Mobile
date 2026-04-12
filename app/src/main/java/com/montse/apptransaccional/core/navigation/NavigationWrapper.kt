@@ -15,6 +15,9 @@ import com.montse.apptransaccional.features.users.presentation.screens.CreateUse
 import com.montse.apptransaccional.features.users.presentation.screens.ProfileScreen
 import com.montse.apptransaccional.features.users.presentation.screens.UsersManagementScreen
 import com.montse.apptransaccional.features.users.presentation.viewmodels.ProfileViewModel
+import com.montse.apptransaccional.features.waiter.presentation.screens.WaiterHomeScreen
+import com.montse.apptransaccional.features.kitchen.presentation.screens.KitchenHomeScreen
+import com.montse.apptransaccional.features.bar.presentation.screens.BarHomeScreen
 
 @Composable
 fun NavigationWrapper() {
@@ -22,26 +25,35 @@ fun NavigationWrapper() {
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route ?: "login"
 
+    fun navigateByRole(role: String) {
+        val destination = when (role) {
+            "admin" -> "dashboard"
+            "mesero" -> "waiter_home"
+            "cocina" -> "kitchen_home"
+            "barra" -> "bar_home"
+            else -> "dashboard"
+        }
+        navController.navigate(destination) {
+            popUpTo("login") { inclusive = true }
+        }
+    }
+
     NavHost(navController = navController, startDestination = "login") {
 
         composable("login") {
             LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
+                onLoginSuccess = { role -> navigateByRole(role) },
                 onNavigateToRegister = {
                     navController.navigate("register")
                 }
             )
         }
-        
+
         composable("register") {
             RegisterScreen(
                 onRegisterSuccess = {
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate("login") {
+                        popUpTo("register") { inclusive = true }
                     }
                 },
                 onBack = {
@@ -50,6 +62,7 @@ fun NavigationWrapper() {
             )
         }
 
+        // ── Admin screens ──────────────────────────────────────────
         composable("dashboard") {
             DishListScreen(
                 onCreate = { navController.navigate("dashboard/create") },
@@ -115,6 +128,39 @@ fun NavigationWrapper() {
                 viewModel = viewModel,
                 onNavigate = { route -> navController.navigate(route) },
                 currentRoute = currentRoute
+            )
+        }
+
+        // ── Mesero screens ─────────────────────────────────────────
+        composable("waiter_home") {
+            WaiterHomeScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ── Cocina screens ─────────────────────────────────────────
+        composable("kitchen_home") {
+            KitchenHomeScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ── Barra screens ──────────────────────────────────────────
+        composable("bar_home") {
+            BarHomeScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
     }
