@@ -35,6 +35,9 @@ interface RestaurantApi {
     @POST("users/auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
 
+    @PUT("users/fcm-token")
+    suspend fun updateFcmToken(@Body body: Map<String, String>): Map<String, Any>
+
     // User endpoints
     @GET("users")
     suspend fun getUsers(): EmployeesResponse

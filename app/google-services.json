@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "584794610777",
+    "project_id": "foodly-cf62b",
+    "storage_bucket": "foodly-cf62b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584794610777:android:8e6899a60a3d992070e548",
+        "android_client_info": {
+          "package_name": "com.montse.apptransaccional"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYcZCHHRWmSRM69rnry21vJvLzQZ3MZFo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

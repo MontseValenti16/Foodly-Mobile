@@ -4,10 +4,13 @@ import com.montse.apptransaccional.core.network.RestaurantApi
 import com.montse.apptransaccional.core.session.SessionManager
 import com.montse.apptransaccional.features.auth.data.repositories.AuthRepositoryImpl
 import com.montse.apptransaccional.features.auth.data.repositories.BiometricAuthRepositoryImpl
+import com.montse.apptransaccional.features.auth.data.repositories.NotificationRepositoryImpl
 import com.montse.apptransaccional.features.auth.domain.repositories.AuthRepository
 import com.montse.apptransaccional.features.auth.domain.repositories.BiometricAuthRepository
+import com.montse.apptransaccional.features.auth.domain.repositories.NotificationRepository
 import com.montse.apptransaccional.features.auth.domain.usecases.LoginUseCase
 import com.montse.apptransaccional.features.auth.domain.usecases.RegisterUseCase
+import com.montse.apptransaccional.features.auth.domain.usecases.UpdateFcmTokenUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -31,6 +34,12 @@ abstract class AuthModule {
         impl: BiometricAuthRepositoryImpl
     ): BiometricAuthRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(
+        impl: NotificationRepositoryImpl
+    ): NotificationRepository
+
     companion object {
         @Provides
         @Singleton
@@ -42,6 +51,12 @@ abstract class AuthModule {
         @Singleton
         fun provideRegisterUseCase(repository: AuthRepository): RegisterUseCase {
             return RegisterUseCase(repository)
+        }
+
+        @Provides
+        @Singleton
+        fun provideUpdateFcmTokenUseCase(repository: NotificationRepository): UpdateFcmTokenUseCase {
+            return UpdateFcmTokenUseCase(repository)
         }
     }
 }
