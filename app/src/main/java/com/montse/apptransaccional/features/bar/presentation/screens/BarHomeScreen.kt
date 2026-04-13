@@ -1,9 +1,12 @@
 package com.montse.apptransaccional.features.bar.presentation.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.montse.apptransaccional.features.bar.presentation.components.atoms.SummaryChip
+import com.montse.apptransaccional.features.bar.presentation.components.molecules.BarOrderCard
 import com.montse.apptransaccional.features.bar.presentation.viewmodels.BarViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,81 +29,83 @@ fun BarHomeScreen(
     viewModel: BarViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val barBlue = Color(0xFF2A7AE0)
+    val accentColor = Color(0xFF2A7AE0)
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Column {
-                        Text("Barra", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text("Barra", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                         state.user?.let {
-                            Text(
-                                text = it.name,
-                                fontSize = 12.sp,
-                                color = Color.White.copy(alpha = 0.8f)
-                            )
+                            Text(it.name, fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = barBlue,
+                    containerColor = accentColor,
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White
                 ),
                 actions = {
-                    IconButton(onClick = {
-                        viewModel.logout()
-                        onLogout()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar sesion")
+                    IconButton(onClick = { viewModel.loadItems() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Recargar")
+                    }
+                    IconButton(onClick = { viewModel.logout(); onLogout() }) {
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Salir")
                     }
                 }
             )
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
+                .padding(padding)
         ) {
+            if (state.items.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SummaryChip("${state.pendingItems.size} Nuevos", Color(0xFFFF9800), Modifier.weight(1f))
+                    SummaryChip("${state.preparingItems.size} Preparando", accentColor, Modifier.weight(1f))
+                }
+            }
+
+            if (state.error != null) {
+                Text(state.error!!, color = Color.Red, fontSize = 13.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+            }
+
             when {
                 state.isLoading -> {
-                    CircularProgressIndicator(color = barBlue)
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = accentColor)
+                    }
                 }
-                state.error != null -> {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = state.error!!, color = Color.Red)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { viewModel.loadProfile() },
-                            colors = ButtonDefaults.buttonColors(containerColor = barBlue)
-                        ) {
-                            Text("Reintentar")
+                state.items.isEmpty() && state.error == null -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.CheckCircle, null, Modifier.size(64.dp), tint = Color(0xFF4CAF50))
+                            Spacer(Modifier.height(12.dp))
+                            Text("Sin pedidos pendientes", fontWeight = FontWeight.Medium, fontSize = 18.sp, color = Color.Gray)
                         }
                     }
                 }
                 else -> {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.LocalBar,
-                            contentDescription = null,
-                            modifier = Modifier.size(80.dp),
-                            tint = barBlue
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Panel de Barra",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Proximamente: bebidas pendientes",
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(state.items) { item ->
+                            BarOrderCard(
+                                item = item,
+                                accentColor = accentColor,
+                                onMarkPreparing = { viewModel.markPreparing(item.id) },
+                                onMarkReady = { viewModel.markReady(item.id) }
+                            )
+                        }
                     }
                 }
             }

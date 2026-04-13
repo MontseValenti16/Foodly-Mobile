@@ -9,11 +9,13 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,10 +28,15 @@ import com.montse.apptransaccional.features.waiter.presentation.viewmodels.Waite
 @Composable
 fun WaiterHomeScreen(
     onLogout: () -> Unit,
+    onOpenSession: (sessionId: Int, tableNumber: Int) -> Unit,
     viewModel: WaiterViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val foodlyPink = Color(0xFFE91E63)
+
+    LaunchedEffect(Unit) {
+        viewModel.loadTables()
+    }
 
     Scaffold(
         topBar = {
@@ -94,7 +101,6 @@ fun WaiterHomeScreen(
                 }
             }
 
-            // Error message
             if (state.error != null) {
                 Text(
                     text = state.error!!,
@@ -104,21 +110,14 @@ fun WaiterHomeScreen(
                 )
             }
 
-            // Loading or grid
             when {
                 state.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = foodlyPink)
                     }
                 }
                 state.tables.isEmpty() && state.error == null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("No hay mesas disponibles", color = Color.Gray)
                     }
                 }
@@ -137,7 +136,9 @@ fun WaiterHomeScreen(
                                 table = table,
                                 onTap = {
                                     if (table.status == TableStatus.LIBRE) {
-                                        viewModel.openSession(table.id)
+                                        viewModel.openSession(table.id, onOpenSession)
+                                    } else if (table.sessionId != null) {
+                                        onOpenSession(table.sessionId, table.number)
                                     }
                                 }
                             )
@@ -147,7 +148,7 @@ fun WaiterHomeScreen(
             }
         }
 
-        // Overlay loading for opening session
+        // Opening session overlay
         if (state.isOpeningSession) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -157,10 +158,7 @@ fun WaiterHomeScreen(
                     color = Color.Black.copy(alpha = 0.3f),
                     modifier = Modifier.fillMaxSize()
                 ) {}
-                Card(
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
+                Card(shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)) {
                     Column(
                         modifier = Modifier.padding(32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -192,7 +190,7 @@ private fun StatusChip(
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
     }
 }

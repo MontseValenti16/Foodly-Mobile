@@ -1,5 +1,6 @@
 package com.montse.apptransaccional.core.network
 
+import com.montse.apptransaccional.core.data.remote.AreaItemDto
 import com.montse.apptransaccional.features.auth.data.datasources.remote.AuthResponse
 import com.montse.apptransaccional.features.auth.data.datasources.remote.LoginRequest
 import com.montse.apptransaccional.features.auth.data.datasources.remote.RegisterRequest
@@ -12,8 +13,13 @@ import com.montse.apptransaccional.features.dashboard.data.datasources.remote.Up
 import com.montse.apptransaccional.features.tables.data.datasources.remote.CreateTableRequest
 import com.montse.apptransaccional.features.tables.data.datasources.remote.TableDto
 import com.montse.apptransaccional.features.tables.data.datasources.remote.TablesResponse
+import com.montse.apptransaccional.features.waiter.data.datasources.remote.CreateOrderRequest
 import com.montse.apptransaccional.features.waiter.data.datasources.remote.CreateSessionRequest
+import com.montse.apptransaccional.features.waiter.data.datasources.remote.CreateTicketRequest
+import com.montse.apptransaccional.features.waiter.data.datasources.remote.OrderDto
+import com.montse.apptransaccional.features.waiter.data.datasources.remote.OrderItemDto
 import com.montse.apptransaccional.features.waiter.data.datasources.remote.SessionDto
+import com.montse.apptransaccional.features.waiter.data.datasources.remote.TicketDto
 import com.montse.apptransaccional.features.users.data.datasources.remote.CreateEmployeeRequest
 import com.montse.apptransaccional.features.users.data.datasources.remote.EmployeesResponse
 import com.montse.apptransaccional.features.users.data.datasources.remote.RolesResponse
@@ -104,4 +110,22 @@ interface RestaurantApi {
 
     @PUT("sessions/{id}/close")
     suspend fun closeSession(@Path("id") id: Int): SessionDto
+
+    // Order endpoints
+    @POST("orders")
+    suspend fun createOrder(@Body request: CreateOrderRequest): OrderDto
+
+    @GET("orders/session/{sessionId}")
+    suspend fun getOrdersBySession(@Path("sessionId") sessionId: Int): List<OrderDto>
+
+    // Order item endpoints
+    @GET("order-items/area/{areaId}")
+    suspend fun getItemsByArea(@Path("areaId") areaId: Int): List<AreaItemDto>
+
+    @PUT("order-items/{id}/status")
+    suspend fun updateItemStatus(@Path("id") id: Int, @Body body: Map<String, String>): OrderItemDto
+
+    // Ticket endpoints
+    @POST("tickets")
+    suspend fun createTicket(@Body request: CreateTicketRequest): TicketDto
 }

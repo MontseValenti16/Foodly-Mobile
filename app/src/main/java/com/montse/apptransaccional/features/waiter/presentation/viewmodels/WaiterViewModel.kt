@@ -57,13 +57,15 @@ class WaiterViewModel @Inject constructor(
         }
     }
 
-    fun openSession(tableId: Int) {
+    fun openSession(tableId: Int, onSessionOpened: (sessionId: Int, tableNumber: Int) -> Unit) {
+        val table = _state.value.tables.find { it.id == tableId } ?: return
+
         viewModelScope.launch {
             _state.value = _state.value.copy(isOpeningSession = true, error = null)
             try {
-                openSessionUseCase(tableId)
-                loadTables()
+                val sessionId = openSessionUseCase(tableId)
                 _state.value = _state.value.copy(isOpeningSession = false)
+                onSessionOpened(sessionId, table.number)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isOpeningSession = false,

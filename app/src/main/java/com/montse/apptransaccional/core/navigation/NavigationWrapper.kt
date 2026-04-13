@@ -16,6 +16,7 @@ import com.montse.apptransaccional.features.users.presentation.screens.ProfileSc
 import com.montse.apptransaccional.features.users.presentation.screens.UsersManagementScreen
 import com.montse.apptransaccional.features.users.presentation.viewmodels.ProfileViewModel
 import com.montse.apptransaccional.features.waiter.presentation.screens.WaiterHomeScreen
+import com.montse.apptransaccional.features.waiter.presentation.screens.WaiterSessionScreen
 import com.montse.apptransaccional.features.kitchen.presentation.screens.KitchenHomeScreen
 import com.montse.apptransaccional.features.bar.presentation.screens.BarHomeScreen
 
@@ -138,6 +139,17 @@ fun NavigationWrapper() {
                     navController.navigate("login") {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onOpenSession = { sessionId, tableNumber ->
+                    navController.navigate("waiter_session/$sessionId/$tableNumber")
+                }
+            )
+        }
+
+        composable("waiter_session/{sessionId}/{tableNumber}") {
+            WaiterSessionScreen(
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }

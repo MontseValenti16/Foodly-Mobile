@@ -17,6 +17,7 @@ class AuthRepositoryImpl @Inject constructor(
         sessionManager.saveToken(response.token)
         sessionManager.saveUserId(response.userId)
         response.userRole?.let { sessionManager.saveUserRole(it) }
+        response.user?.areaId?.let { sessionManager.saveAreaId(it) }
         return response
     }
     override suspend fun register(username: String, email: String, pass: String): AuthResponse {
