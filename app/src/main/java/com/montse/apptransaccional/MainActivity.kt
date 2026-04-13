@@ -1,25 +1,19 @@
 package com.montse.apptransaccional
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.montse.apptransaccional.core.di.AppContainer
+import androidx.fragment.app.FragmentActivity
 import com.montse.apptransaccional.core.navigation.NavigationWrapper
-import com.montse.apptransaccional.features.auth.di.AuthModule
-import com.montse.apptransaccional.features.dashboard.di.DashboardModule
 import com.montse.apptransaccional.ui.theme.AppTransaccionalTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-class MainActivity : ComponentActivity() {
+@AndroidEntryPoint
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val appContainer = AppContainer(this)
-        val authModule = AuthModule(appContainer)
-        val dashboardModule = DashboardModule(appContainer)
-
         setContent {
             AppTransaccionalTheme {
-                NavigationWrapper(authModule, dashboardModule)
+                NavigationWrapper()
             }
         }
     }

@@ -1,7 +1,8 @@
 package com.montse.apptransaccional.features.dashboard.domain.usecases
 
 import com.montse.apptransaccional.features.dashboard.domain.repositories.DishRepository
+import javax.inject.Inject
 
-class DeleteDishUseCase(private val repository: DishRepository) {
+class DeleteDishUseCase @Inject constructor(private val repository: DishRepository) {
     suspend operator fun invoke(id: Int) = repository.deleteDish(id)
 }

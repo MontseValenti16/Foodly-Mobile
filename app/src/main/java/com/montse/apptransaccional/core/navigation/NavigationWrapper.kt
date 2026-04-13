@@ -1,51 +1,60 @@
-    package com.montse.apptransaccional.core.navigation
+package com.montse.apptransaccional.core.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.montse.apptransaccional.features.auth.di.AuthModule
 import com.montse.apptransaccional.features.auth.presentation.screens.LoginScreen
 import com.montse.apptransaccional.features.auth.presentation.screens.RegisterScreen
-import com.montse.apptransaccional.features.dashboard.di.DashboardModule
-import com.montse.apptransaccional.features.dashboard.presentation.screens.CreateDishScreen
-import com.montse.apptransaccional.features.dashboard.presentation.screens.DishListScreen
-import com.montse.apptransaccional.features.dashboard.presentation.screens.EditDishScreen
-import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.DashboardViewModel
-
+import com.montse.apptransaccional.features.dashboard.presentation.screens.*
+import com.montse.apptransaccional.features.tables.presentation.screens.CreateTableScreen
+import com.montse.apptransaccional.features.tables.presentation.screens.TablesScreen
+import com.montse.apptransaccional.features.users.presentation.screens.CreateUserScreen
+import com.montse.apptransaccional.features.users.presentation.screens.ProfileScreen
+import com.montse.apptransaccional.features.users.presentation.screens.UsersManagementScreen
+import com.montse.apptransaccional.features.users.presentation.viewmodels.ProfileViewModel
+import com.montse.apptransaccional.features.waiter.presentation.screens.WaiterHomeScreen
+import com.montse.apptransaccional.features.waiter.presentation.screens.WaiterSessionScreen
+import com.montse.apptransaccional.features.kitchen.presentation.screens.KitchenHomeScreen
+import com.montse.apptransaccional.features.bar.presentation.screens.BarHomeScreen
 
 @Composable
-fun NavigationWrapper(
-    authModule: AuthModule,
-    dashboardModule: DashboardModule
-) {
+fun NavigationWrapper() {
     val navController = rememberNavController()
-    val dashboardViewModel: DashboardViewModel = viewModel(
-        factory = dashboardModule.provideDashboardViewModelFactory()
-    )
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route ?: "login"
+
+    fun navigateByRole(role: String) {
+        val destination = when (role) {
+            "admin" -> "dashboard"
+            "mesero" -> "waiter_home"
+            "cocina" -> "kitchen_home"
+            "barra" -> "bar_home"
+            else -> "dashboard"
+        }
+        navController.navigate(destination) {
+            popUpTo("login") { inclusive = true }
+        }
+    }
 
     NavHost(navController = navController, startDestination = "login") {
 
         composable("login") {
             LoginScreen(
-                factory = authModule.provideAuthViewModelFactory(),
-                onLoginSuccess = {
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
+                onLoginSuccess = { role -> navigateByRole(role) },
                 onNavigateToRegister = {
                     navController.navigate("register")
                 }
             )
         }
+
         composable("register") {
             RegisterScreen(
-                factory = authModule.provideAuthViewModelFactory(),
                 onRegisterSuccess = {
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
+                    navController.navigate("login") {
+                        popUpTo("register") { inclusive = true }
                     }
                 },
                 onBack = {
@@ -54,18 +63,53 @@ fun NavigationWrapper(
             )
         }
 
+        // ── Admin screens ──────────────────────────────────────────
         composable("dashboard") {
             DishListScreen(
-                viewModel = dashboardViewModel,
                 onCreate = { navController.navigate("dashboard/create") },
                 onEdit = { id -> navController.navigate("dashboard/edit/$id") },
-                onDelete = dashboardViewModel::deleteDish
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute
+            )
+        }
+
+        composable("sales") {
+            SalesScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute
+            )
+        }
+
+        composable("tables") {
+            TablesScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute,
+                onCreate = { navController.navigate("tables/create") }
+            )
+        }
+
+        composable("tables/create") {
+            CreateTableScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("profiles") {
+            UsersManagementScreen(
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute,
+                onCreate = { navController.navigate("profiles/create") }
+            )
+        }
+
+        composable("profiles/create") {
+            CreateUserScreen(
+                onBack = { navController.popBackStack() }
             )
         }
 
         composable("dashboard/create") {
             CreateDishScreen(
-                viewModel = dashboardViewModel,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -74,11 +118,62 @@ fun NavigationWrapper(
             val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
                 ?: return@composable
             EditDishScreen(
-                viewModel = dashboardViewModel,
                 dishId = id,
                 onBack = { navController.popBackStack() }
             )
         }
 
+        composable("profile") {
+            val viewModel: ProfileViewModel = hiltViewModel()
+            ProfileScreen(
+                viewModel = viewModel,
+                onNavigate = { route -> navController.navigate(route) },
+                currentRoute = currentRoute
+            )
+        }
+
+        // ── Mesero screens ─────────────────────────────────────────
+        composable("waiter_home") {
+            WaiterHomeScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onOpenSession = { sessionId, tableNumber ->
+                    navController.navigate("waiter_session/$sessionId/$tableNumber")
+                }
+            )
+        }
+
+        composable("waiter_session/{sessionId}/{tableNumber}") {
+            WaiterSessionScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // ── Cocina screens ─────────────────────────────────────────
+        composable("kitchen_home") {
+            KitchenHomeScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ── Barra screens ──────────────────────────────────────────
+        composable("bar_home") {
+            BarHomeScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
     }
 }

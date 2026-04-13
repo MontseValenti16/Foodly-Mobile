@@ -11,12 +11,33 @@ class SessionManager(context: Context) {
 
     fun getToken(): String? = prefs.getString(KEY_TOKEN, null)
 
+    fun saveUserId(userId: Int) {
+        prefs.edit().putInt(KEY_USER_ID, userId).apply()
+    }
+
+    fun getUserId(): Int = prefs.getInt(KEY_USER_ID, -1)
+
+    fun saveUserRole(role: String) {
+        prefs.edit().putString(KEY_USER_ROLE, role).apply()
+    }
+
+    fun getUserRole(): String? = prefs.getString(KEY_USER_ROLE, null)
+
+    fun saveAreaId(areaId: Int) {
+        prefs.edit().putInt(KEY_AREA_ID, areaId).apply()
+    }
+
+    fun getAreaId(): Int = prefs.getInt(KEY_AREA_ID, -1)
+
     fun clear() {
-        prefs.edit().remove(KEY_TOKEN).apply()
+        prefs.edit().clear().apply()
     }
 
     companion object {
         private const val PREFS_NAME = "app_session"
         private const val KEY_TOKEN = "token"
+        private const val KEY_USER_ID = "user_id"
+        private const val KEY_USER_ROLE = "user_role"
+        private const val KEY_AREA_ID = "area_id"
     }
 }

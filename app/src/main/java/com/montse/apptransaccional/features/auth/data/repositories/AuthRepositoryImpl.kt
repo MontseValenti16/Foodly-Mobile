@@ -6,14 +6,18 @@ import com.montse.apptransaccional.features.auth.data.datasources.remote.LoginRe
 import com.montse.apptransaccional.features.auth.data.datasources.remote.RegisterRequest
 import com.montse.apptransaccional.core.session.SessionManager
 import com.montse.apptransaccional.features.auth.domain.repositories.AuthRepository
+import javax.inject.Inject
 
-class AuthRepositoryImpl(
+class AuthRepositoryImpl @Inject constructor(
     private val api: RestaurantApi,
     private val sessionManager: SessionManager
 ) : AuthRepository {
-    override suspend fun login(email: String, pass: String): AuthResponse {
-        val response = api.login(LoginRequest(email, pass))
+    override suspend fun login(username: String, pass: String): AuthResponse {
+        val response = api.login(LoginRequest(username, pass))
         sessionManager.saveToken(response.token)
+        sessionManager.saveUserId(response.userId)
+        response.userRole?.let { sessionManager.saveUserRole(it) }
+        response.user?.areaId?.let { sessionManager.saveAreaId(it) }
         return response
     }
     override suspend fun register(username: String, email: String, pass: String): AuthResponse {

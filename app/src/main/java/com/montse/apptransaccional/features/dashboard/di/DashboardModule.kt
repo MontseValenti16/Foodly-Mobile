@@ -1,29 +1,115 @@
 package com.montse.apptransaccional.features.dashboard.di
 
-import com.montse.apptransaccional.core.di.AppContainer
+import android.content.Context
+import com.montse.apptransaccional.core.network.RestaurantApi
+import com.montse.apptransaccional.features.dashboard.data.datasources.local.DishDao
+import com.montse.apptransaccional.features.dashboard.data.repositories.AreaRepositoryImpl
+import com.montse.apptransaccional.features.dashboard.data.repositories.CategoryRepositoryImpl
 import com.montse.apptransaccional.features.dashboard.data.repositories.DishRepositoryImpl
-import com.montse.apptransaccional.features.dashboard.domain.usecases.CreateDishUseCase
-import com.montse.apptransaccional.features.dashboard.domain.usecases.DeleteDishUseCase
-import com.montse.apptransaccional.features.dashboard.domain.usecases.GetDishByIdUseCase
-import com.montse.apptransaccional.features.dashboard.domain.usecases.GetDishesUseCase
-import com.montse.apptransaccional.features.dashboard.domain.usecases.UpdateDishUseCase
-import com.montse.apptransaccional.features.dashboard.presentation.viewmodels.DashboardViewModelFactory
+import com.montse.apptransaccional.features.dashboard.data.repositories.CameraRepositoryImpl
+import com.montse.apptransaccional.features.dashboard.data.repositories.VibrationRepositoryImpl
+import com.montse.apptransaccional.features.dashboard.domain.repositories.AreaRepository
+import com.montse.apptransaccional.features.dashboard.domain.repositories.CategoryRepository
+import com.montse.apptransaccional.features.dashboard.domain.repositories.DishRepository
+import com.montse.apptransaccional.features.dashboard.domain.repositories.CameraRepository
+import com.montse.apptransaccional.features.dashboard.domain.repositories.VibrationRepository
+import com.montse.apptransaccional.features.dashboard.domain.usecases.*
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
-class DashboardModule(appContainer: AppContainer) {
-	private val repository = DishRepositoryImpl(appContainer.restaurantApi)
-	private val getDishesUseCase = GetDishesUseCase(repository)
-	private val getDishByIdUseCase = GetDishByIdUseCase(repository)
-	private val createDishUseCase = CreateDishUseCase(repository)
-	private val updateDishUseCase = UpdateDishUseCase(repository)
-	private val deleteDishUseCase = DeleteDishUseCase(repository)
+@Module
+@InstallIn(SingletonComponent::class)
+object DashboardModule {
 
-	fun provideDashboardViewModelFactory(): DashboardViewModelFactory {
-		return DashboardViewModelFactory(
-			getDishesUseCase,
-			getDishByIdUseCase,
-			createDishUseCase,
-			updateDishUseCase,
-			deleteDishUseCase
-		)
-	}
+    @Provides
+    @Singleton
+    fun provideDishRepository(
+        api: RestaurantApi,
+        dishDao: DishDao,
+        @ApplicationContext context: Context
+    ): DishRepository {
+        return DishRepositoryImpl(api, dishDao, context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryRepository(api: RestaurantApi): CategoryRepository {
+        return CategoryRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAreaRepository(api: RestaurantApi): AreaRepository {
+        return AreaRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCameraRepository(@ApplicationContext context: Context): CameraRepository {
+        return CameraRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVibrationRepository(@ApplicationContext context: Context): VibrationRepository {
+        return VibrationRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetDishesUseCase(repository: DishRepository): GetDishesUseCase {
+        return GetDishesUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetDishByIdUseCase(repository: DishRepository): GetDishByIdUseCase {
+        return GetDishByIdUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateDishUseCase(repository: DishRepository): CreateDishUseCase {
+        return CreateDishUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUpdateDishUseCase(repository: DishRepository): UpdateDishUseCase {
+        return UpdateDishUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeleteDishUseCase(repository: DishRepository): DeleteDishUseCase {
+        return DeleteDishUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetCategoriesUseCase(repository: CategoryRepository): GetCategoriesUseCase {
+        return GetCategoriesUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetAreasUseCase(repository: AreaRepository): GetAreasUseCase {
+        return GetAreasUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateTempImageUriUseCase(repository: CameraRepository): CreateTempImageUriUseCase {
+        return CreateTempImageUriUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVibrateUseCase(repository: VibrationRepository): VibrateUseCase {
+        return VibrateUseCase(repository)
+    }
 }
