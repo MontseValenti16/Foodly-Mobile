@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.montse.apptransaccional.features.dashboard.domain.models.Dish
 import com.montse.apptransaccional.features.waiter.domain.models.CartItem
+import com.montse.apptransaccional.core.messaging.OrderEvent
+import com.montse.apptransaccional.core.messaging.OrderEventBus
 import com.montse.apptransaccional.features.waiter.domain.usecases.CloseSessionUseCase
 import com.montse.apptransaccional.features.waiter.domain.usecases.GetProductsUseCase
 import com.montse.apptransaccional.features.waiter.domain.usecases.GetSessionOrdersUseCase
@@ -38,6 +40,26 @@ class WaiterSessionViewModel @Inject constructor(
         val tableNumber = savedStateHandle.get<String>("tableNumber")?.toIntOrNull() ?: 0
         _state.value = _state.value.copy(sessionId = sessionId, tableNumber = tableNumber)
         loadData()
+        observeEvents()
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            OrderEventBus.events.collect { event ->
+                if (event is OrderEvent.StatusUpdate && !_state.value.sessionClosed) {
+                    refreshOrders()
+                }
+            }
+        }
+    }
+
+    private fun refreshOrders() {
+        viewModelScope.launch {
+            try {
+                val orders = getSessionOrdersUseCase(_state.value.sessionId)
+                _state.value = _state.value.copy(orders = orders)
+            } catch (_: Exception) { }
+        }
     }
 
     fun loadData() {

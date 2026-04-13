@@ -2,6 +2,8 @@ package com.montse.apptransaccional.features.kitchen.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.montse.apptransaccional.core.messaging.OrderEvent
+import com.montse.apptransaccional.core.messaging.OrderEventBus
 import com.montse.apptransaccional.core.network.RestaurantApi
 import com.montse.apptransaccional.core.session.SessionManager
 import com.montse.apptransaccional.features.kitchen.presentation.state.KitchenState
@@ -26,6 +28,29 @@ class KitchenViewModel @Inject constructor(
     init {
         loadProfile()
         loadItems()
+        observeEvents()
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            OrderEventBus.events.collect { event ->
+                if (event is OrderEvent.NewOrder) {
+                    refreshItems()
+                }
+            }
+        }
+    }
+
+    private fun refreshItems() {
+        val areaId = sessionManager.getAreaId()
+        if (areaId == -1) return
+
+        viewModelScope.launch {
+            try {
+                val items = api.getItemsByArea(areaId)
+                _state.value = _state.value.copy(items = items, error = null)
+            } catch (_: Exception) { }
+        }
     }
 
     fun loadProfile() {

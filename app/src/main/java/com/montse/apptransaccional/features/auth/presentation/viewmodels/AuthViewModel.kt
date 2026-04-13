@@ -7,7 +7,10 @@ import com.montse.apptransaccional.features.auth.domain.usecases.IsBiometricLogi
 import com.montse.apptransaccional.features.auth.domain.usecases.LoginUseCase
 import com.montse.apptransaccional.features.auth.domain.usecases.RegisterUseCase
 import com.montse.apptransaccional.features.auth.domain.usecases.SaveBiometricCredentialsUseCase
+import com.montse.apptransaccional.features.auth.domain.usecases.UpdateFcmTokenUseCase
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +23,8 @@ class AuthViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
     private val isBiometricLoginAvailableUseCase: IsBiometricLoginAvailableUseCase,
     private val getBiometricCredentialsUseCase: GetBiometricCredentialsUseCase,
-    private val saveBiometricCredentialsUseCase: SaveBiometricCredentialsUseCase
+    private val saveBiometricCredentialsUseCase: SaveBiometricCredentialsUseCase,
+    private val updateFcmTokenUseCase: UpdateFcmTokenUseCase
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
@@ -33,6 +37,15 @@ class AuthViewModel @Inject constructor(
 
     init {
         refreshBiometricAvailability()
+    }
+
+    private fun sendFcmToken() {
+        viewModelScope.launch {
+            try {
+                val token = FirebaseMessaging.getInstance().token.await()
+                updateFcmTokenUseCase(token)
+            } catch (_: Exception) { }
+        }
     }
 
     fun refreshBiometricAvailability() {
@@ -140,6 +153,7 @@ class AuthViewModel @Inject constructor(
                     biometricError = null,
                     isBiometricLoginAvailable = isBiometricLoginAvailableUseCase()
                 )
+                sendFcmToken()
                 onSuccess(response.userRole ?: "admin")
             } catch (e: Exception) {
                 _authState.value = _authState.value.copy(
@@ -174,6 +188,7 @@ class AuthViewModel @Inject constructor(
                         isBiometricLoginAvailable = isBiometricLoginAvailableUseCase()
                     )
                 )
+                sendFcmToken()
                 onSuccess(response.userRole ?: "admin")
             } catch (e: Exception) {
                 _authState.value = _authState.value.copy(

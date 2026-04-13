@@ -35,6 +35,26 @@ class FoodlyFcmService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
+
+        // Emit event so ViewModels refresh instantly
+        val type = message.data["type"]
+        when (type) {
+            "NEW_ORDER" -> OrderEventBus.emit(
+                OrderEvent.NewOrder(
+                    areaId = message.data["area_id"],
+                    tableNumber = message.data["table_number"]
+                )
+            )
+            "ORDER_STATUS_UPDATE" -> OrderEventBus.emit(
+                OrderEvent.StatusUpdate(
+                    itemId = message.data["item_id"],
+                    status = message.data["status"],
+                    tableNumber = message.data["table_number"]
+                )
+            )
+        }
+
+        // Show notification
         showNotification(message)
     }
 
@@ -52,8 +72,8 @@ class FoodlyFcmService : FirebaseMessagingService() {
         }
 
         val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle(remoteMessage.notification?.title ?: "Update in Foodly")
-            .setContentText(remoteMessage.notification?.body ?: "There's a change in your orders")
+            .setContentTitle(remoteMessage.notification?.title ?: "Foodly")
+            .setContentText(remoteMessage.notification?.body ?: "Hay cambios en tus pedidos")
             .setSmallIcon(R.drawable.logo_foodly)
             .setAutoCancel(true)
             .build()
