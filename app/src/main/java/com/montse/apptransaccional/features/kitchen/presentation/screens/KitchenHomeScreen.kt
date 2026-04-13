@@ -1,5 +1,6 @@
 package com.montse.apptransaccional.features.kitchen.presentation.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,9 +30,10 @@ fun KitchenHomeScreen(
     viewModel: KitchenViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val accentColor = Color(0xFFE05C2A)
+    val foodlyPink = Color(0xFFE91E63)
 
     Scaffold(
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
                 title = {
@@ -43,7 +45,7 @@ fun KitchenHomeScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = accentColor,
+                    containerColor = foodlyPink,
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White
                 ),
@@ -62,6 +64,7 @@ fun KitchenHomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(Color.White)
         ) {
             if (state.items.isNotEmpty()) {
                 Row(
@@ -69,7 +72,7 @@ fun KitchenHomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     SummaryChip("${state.pendingItems.size} Nuevos", Color(0xFFFF9800), Modifier.weight(1f))
-                    SummaryChip("${state.preparingItems.size} Preparando", accentColor, Modifier.weight(1f))
+                    SummaryChip("${state.preparingItems.size} Preparando", foodlyPink, Modifier.weight(1f))
                 }
             }
 
@@ -80,7 +83,7 @@ fun KitchenHomeScreen(
             when {
                 state.isLoading -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = accentColor)
+                        CircularProgressIndicator(color = foodlyPink)
                     }
                 }
                 state.items.isEmpty() && state.error == null -> {
@@ -101,7 +104,7 @@ fun KitchenHomeScreen(
                         items(state.items) { item ->
                             AreaOrderCard(
                                 item = item,
-                                accentColor = accentColor,
+                                accentColor = foodlyPink,
                                 onMarkPreparing = { viewModel.markPreparing(item.id) },
                                 onMarkReady = { viewModel.markReady(item.id) }
                             )

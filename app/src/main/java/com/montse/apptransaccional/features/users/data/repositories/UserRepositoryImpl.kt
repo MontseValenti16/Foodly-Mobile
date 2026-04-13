@@ -3,12 +3,18 @@ package com.montse.apptransaccional.features.users.data.repositories
 import com.montse.apptransaccional.core.network.RestaurantApi
 import com.montse.apptransaccional.features.users.data.datasources.remote.CreateEmployeeRequest
 import com.montse.apptransaccional.features.auth.data.datasources.remote.UserData
+import com.montse.apptransaccional.features.users.data.local.daos.UserDao
+import com.montse.apptransaccional.features.users.data.local.entities.toDomain
+import com.montse.apptransaccional.features.users.data.local.entities.toEntity
 import com.montse.apptransaccional.features.users.domain.models.Role
 import com.montse.apptransaccional.features.users.domain.models.User
 import com.montse.apptransaccional.features.users.domain.repositories.UserRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class UserRepositoryImpl(
-    private val api: RestaurantApi
+    private val api: RestaurantApi,
+    private val userDao: UserDao
 ) : UserRepository {
 
     override suspend fun getUsers(): List<User> {
@@ -16,8 +22,9 @@ class UserRepositoryImpl(
     }
 
     override suspend fun getUserById(id: Int): User {
-        // Accedemos a la propiedad .employee del UserResponse
-        return api.getUserById(id).employee.toDomain()
+        val user = api.getUserById(id).employee.toDomain()
+        saveUserLocally(user) // Actualizamos caché local al obtener por ID
+        return user
     }
 
     override suspend fun createUser(name: String, username: String, password: String, roleId: Int): User {
@@ -43,7 +50,9 @@ class UserRepositoryImpl(
     }
 
     override suspend fun updateUser(id: Int, user: User): User {
-        return api.updateUser(id, user.toData()).toDomain()
+        val updatedUser = api.updateUser(id, user.toData()).toDomain()
+        saveUserLocally(updatedUser)
+        return updatedUser
     }
 
     override suspend fun deleteUser(id: Int) {
@@ -52,6 +61,19 @@ class UserRepositoryImpl(
 
     override suspend fun getAvailableRoles(): List<Role> {
         return api.getRoles().roles.map { it.toDomain() }
+    }
+
+    // Room implementations
+    override fun getLocalUser(): Flow<User?> {
+        return userDao.getUser().map { it?.toDomain() }
+    }
+
+    override suspend fun saveUserLocally(user: User) {
+        userDao.insertUser(user.toEntity())
+    }
+
+    override suspend fun clearLocalUser() {
+        userDao.deleteUser()
     }
 
     private fun UserData.toDomain(): User {

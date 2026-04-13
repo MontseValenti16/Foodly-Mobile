@@ -3,6 +3,7 @@ package com.montse.apptransaccional.features.waiter.presentation.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -72,8 +73,9 @@ fun WaiterSessionScreen(
         )
     }
 
-    // ── Scaffold ────────────────────────────────────��───────────
+    // ── Scaffold ───────────────────────────────────────────────
     Scaffold(
+        containerColor = Color.White,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
@@ -116,6 +118,7 @@ fun WaiterSessionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(Color.White)
         ) {
             when {
                 state.isLoading -> {
@@ -150,7 +153,7 @@ fun WaiterSessionScreen(
                 )
             }
 
-            // ── Cart panel ───────��──────────────────────────────
+            // ── Cart panel ──────────────────────────────────────
             AnimatedVisibility(
                 visible = showCart,
                 enter = slideInVertically { it },
@@ -185,11 +188,11 @@ fun WaiterSessionScreen(
 
 @Composable
 private fun SessionClosedContent(onBack: () -> Unit, accentColor: Color) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Color.White), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(Icons.Default.Receipt, null, Modifier.size(64.dp), tint = Color(0xFF4CAF50))
             Spacer(Modifier.height(12.dp))
-            Text("Cuenta cerrada", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text("Cuenta cerrada", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.Black)
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = onBack,
@@ -207,7 +210,7 @@ private fun SessionActiveContent(
     viewModel: WaiterSessionViewModel,
     accentColor: Color
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
         // Error
         if (state.error != null) {
             Text(
@@ -244,7 +247,9 @@ private fun SessionActiveContent(
                     label = { Text("Todo") },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = accentColor,
-                        selectedLabelColor = Color.White
+                        selectedLabelColor = Color.White,
+                        containerColor = Color(0xFFF2F2F2),
+                        labelColor = Color.Gray
                     )
                 )
             }
@@ -255,7 +260,9 @@ private fun SessionActiveContent(
                     label = { Text(cat.name) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = accentColor,
-                        selectedLabelColor = Color.White
+                        selectedLabelColor = Color.White,
+                        containerColor = Color(0xFFF2F2F2),
+                        labelColor = Color.Gray
                     )
                 )
             }

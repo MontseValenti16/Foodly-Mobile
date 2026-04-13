@@ -1,5 +1,6 @@
 package com.montse.apptransaccional.features.waiter.presentation.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -39,6 +40,7 @@ fun WaiterHomeScreen(
     }
 
     Scaffold(
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
                 title = {
@@ -76,6 +78,7 @@ fun WaiterHomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(Color.White)
         ) {
             // Status summary bar
             if (state.tables.isNotEmpty()) {
@@ -127,9 +130,9 @@ fun WaiterHomeScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(vertical = 8.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         items(state.tables) { table ->
                             WaiterTableCard(
@@ -158,7 +161,10 @@ fun WaiterHomeScreen(
                     color = Color.Black.copy(alpha = 0.3f),
                     modifier = Modifier.fillMaxSize()
                 ) {}
-                Card(shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)) {
+                Card(
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
                     Column(
                         modifier = Modifier.padding(32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally

@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,7 +24,8 @@ import com.montse.apptransaccional.features.users.presentation.viewmodels.Profil
 fun ProfileScreen(
     viewModel: ProfileViewModel,
     onNavigate: (String) -> Unit,
-    currentRoute: String
+    currentRoute: String,
+    onLogout: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val foodlyPink = Color(0xFFE91E63)
@@ -72,12 +75,29 @@ fun ProfileScreen(
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = "Mi Perfil",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(vertical = 16.dp)
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Mi Perfil",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
+                                
+                                IconButton(onClick = {
+                                    viewModel.logout()
+                                    onLogout()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                                        contentDescription = "Cerrar Sesión",
+                                        tint = foodlyPink
+                                    )
+                                }
+                            }
 
                             ProfileItemCard(label = "Nombre Completo", value = user.name)
                             ProfileItemCard(label = "Nombre de Usuario", value = "@${user.username}")
@@ -91,6 +111,23 @@ fun ProfileScreen(
                                 value = if (user.isActive) "Activa" else "Inactiva",
                                 valueColor = if (user.isActive) Color(0xFF2ECC71) else Color.Red
                             )
+                            
+                            Spacer(modifier = Modifier.weight(1f))
+                            
+                            Button(
+                                onClick = {
+                                    viewModel.logout()
+                                    onLogout()
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = foodlyPink),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Cerrar Sesión", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
                 }

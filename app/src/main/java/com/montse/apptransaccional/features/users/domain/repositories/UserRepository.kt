@@ -2,6 +2,7 @@ package com.montse.apptransaccional.features.users.domain.repositories
 
 import com.montse.apptransaccional.features.users.domain.models.Role
 import com.montse.apptransaccional.features.users.domain.models.User
+import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
     suspend fun getUsers(): List<User>
@@ -10,4 +11,9 @@ interface UserRepository {
     suspend fun updateUser(id: Int, user: User): User
     suspend fun deleteUser(id: Int)
     suspend fun getAvailableRoles(): List<Role>
+    
+    // Room methods
+    fun getLocalUser(): Flow<User?>
+    suspend fun saveUserLocally(user: User)
+    suspend fun clearLocalUser()
 }

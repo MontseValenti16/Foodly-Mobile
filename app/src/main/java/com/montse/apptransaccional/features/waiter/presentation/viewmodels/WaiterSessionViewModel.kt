@@ -202,13 +202,22 @@ class WaiterSessionViewModel @Inject constructor(
 
     fun closeSession() {
         viewModelScope.launch {
+            // Calculamos el subtotal sumando el precio de todos los items en todas las órdenes
+            val subtotal = _state.value.allItems.sumOf { (it.unitPrice.toDoubleOrNull() ?: 0.0) * it.quantity }
+            val tipPercent = _state.value.tip.toDoubleOrNull() ?: 0.0
+            val discountPercent = _state.value.discount.toDoubleOrNull() ?: 0.0
+            
+            // Calculamos los montos reales a partir de los porcentajes
+            val tipAmount = subtotal * (tipPercent / 100.0)
+            val discountAmount = subtotal * (discountPercent / 100.0)
+
             _state.value = _state.value.copy(isClosingSession = true, error = null, showCloseDialog = false)
             try {
                 val ticket = closeSessionUseCase(
                     sessionId = _state.value.sessionId,
                     paymentMethod = _state.value.paymentMethod,
-                    tip = _state.value.tip.toDoubleOrNull() ?: 0.0,
-                    discount = _state.value.discount.toDoubleOrNull() ?: 0.0
+                    tip = tipAmount,
+                    discount = discountAmount
                 )
                 _state.value = _state.value.copy(
                     isClosingSession = false,

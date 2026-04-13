@@ -1,6 +1,7 @@
 package com.montse.apptransaccional.features.users.di
 
 import com.montse.apptransaccional.core.network.RestaurantApi
+import com.montse.apptransaccional.features.users.data.local.daos.UserDao
 import com.montse.apptransaccional.features.users.data.repositories.UserRepositoryImpl
 import com.montse.apptransaccional.features.users.domain.repositories.UserRepository
 import com.montse.apptransaccional.features.users.domain.usecases.CreateUserUseCase
@@ -21,8 +22,11 @@ object UsersModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(api: RestaurantApi): UserRepository {
-        return UserRepositoryImpl(api)
+    fun provideUserRepository(
+        api: RestaurantApi,
+        userDao: UserDao
+    ): UserRepository {
+        return UserRepositoryImpl(api, userDao)
     }
 
     @Provides

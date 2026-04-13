@@ -128,7 +128,12 @@ fun NavigationWrapper() {
             ProfileScreen(
                 viewModel = viewModel,
                 onNavigate = { route -> navController.navigate(route) },
-                currentRoute = currentRoute
+                currentRoute = currentRoute,
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 
